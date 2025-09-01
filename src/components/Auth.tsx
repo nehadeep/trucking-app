@@ -1,14 +1,4 @@
 import React, { useState } from "react";
-import { auth } from "../firebaseConfig";
-import {
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-    RecaptchaVerifier,
-    signInWithPhoneNumber,
-    GoogleAuthProvider,
-    signInWithPopup
-} from "firebase/auth";
-
 import {
     Box,
     Button,
@@ -21,10 +11,24 @@ import {
     Typography,
 } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
+import { useSnackbar } from "notistack";
+import {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    RecaptchaVerifier,
+    signInWithPhoneNumber,
+    GoogleAuthProvider,
+    signInWithPopup,
+} from "firebase/auth";
+import { auth } from "../firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 
 
 const Auth: React.FC = () => {
-    const [mode, setMode] = useState<"email" | "phone">("email"); // switch between email/phone login
+    const { enqueueSnackbar } = useSnackbar();
+
+    const [mode, setMode] = useState<"email" | "phone">("email");
     const [isSignup, setIsSignup] = useState(false);
 
     // Email/password state
@@ -41,14 +45,28 @@ const Auth: React.FC = () => {
         try {
             if (isSignup) {
                 await createUserWithEmailAndPassword(auth, email, password);
-                alert("User registered successfully ✅");
+                enqueueSnackbar("User registered successfully ✅", { variant: "success" });
             } else {
                 await signInWithEmailAndPassword(auth, email, password);
-                alert("Login successful ✅");
+                enqueueSnackbar("Login successful ✅", { variant: "success" });
             }
-        } catch (error) {
-            console.error(error);
-            alert("Authentication failed ❌");
+        } catch (error:any) {
+            switch (error.code) {
+                case "auth/user-not-found":
+                    enqueueSnackbar("This email is not registered ❌", { variant: "error" });
+                    break;
+                case "auth/wrong-password":
+                    enqueueSnackbar("Incorrect password ❌", { variant: "error" });
+                    break;
+                case "auth/email-already-in-use":
+                    enqueueSnackbar("This email is already registered ❌", { variant: "error" });
+                    break;
+                case "auth/weak-password":
+                    enqueueSnackbar("Password should be at least 6 characters ❌", { variant: "warning" });
+                    break;
+                default:
+                    enqueueSnackbar("Something went wrong, try again ❌", { variant: "error" });
+            }
         }
     };
 
@@ -60,119 +78,197 @@ const Auth: React.FC = () => {
                 "recaptcha-container",
                 {
                     size: "invisible",
-                    callback: () => {
-                        console.log("reCAPTCHA solved");
-                    },
+                    callback: () => console.log("reCAPTCHA solved"),
                 }
             );
         }
     };
 
-
     // Step 1: Send OTP
     const sendOtp = async () => {
-        setupRecaptcha();
         try {
-            const appVerifier = (window as any).recaptchaVerifier;
-            const result = await signInWithPhoneNumber(auth, phone, appVerifier);
-            setConfirmationResult(result);
-            alert("OTP sent to phone ✅");
-        } catch (error) {
-            console.error(error);
-            alert("Failed to send OTP ❌");
-        }
-    };
+            // 🔍 Check if phone exists in Firestore (e.g., in "drivers" collection)
+            const driverRef = doc(db, "drivers", phone);
+            const driverSnap = await getDoc(driverRef);
+
+            if (!driverSnap.exists()) {
+                enqueueSnackbar("This phone number is not registered ❌", {variant: "error"});
+                return; // stop here, don't send OTP
+            }
+
+            setupRecaptcha();
+
+                const appVerifier = (window as any).recaptchaVerifier;
+                const result = await signInWithPhoneNumber(auth, phone, appVerifier);
+                setConfirmationResult(result);
+                enqueueSnackbar("OTP sent to phone ✅", {variant: "success"});
+            } catch (error) {
+                console.error(error);
+                enqueueSnackbar("Failed to send OTP ❌", {variant: "error"});
+            }
+        };
+
 
     // Step 2: Verify OTP
     const verifyOtp = async () => {
         try {
             if (confirmationResult) {
                 await confirmationResult.confirm(otp);
-                alert("Phone verified & user logged in ✅");
+                enqueueSnackbar("Phone verified & user logged in ✅", { variant: "success" });
             }
-        } catch (error) {
+        } catch (error:any) {
             console.error(error);
-            alert("Invalid OTP ❌");
+            enqueueSnackbar("Invalid OTP ❌", { variant: "error" });
+            switch (error.code) {
+                case "auth/invalid-verification-code":
+                    enqueueSnackbar("Invalid OTP ❌", { variant: "error" });
+                    break;
+                case "auth/invalid-phone-number":
+                    enqueueSnackbar("Phone number format is incorrect ❌", { variant: "error" });
+                    break;
+                default:
+                    enqueueSnackbar("Failed to verify phone ❌", { variant: "error" });
+            }
         }
     };
 
+    // Google Login
     const handleGoogleAuth = async () => {
         try {
             const provider = new GoogleAuthProvider();
             await signInWithPopup(auth, provider);
-            alert("Logged in with Google ✅");
+            enqueueSnackbar("Logged in with Google ✅", { variant: "success" });
         } catch (error) {
             console.error(error);
-            alert("Google login failed ❌");
+            enqueueSnackbar("Google login failed ❌", { variant: "error" });
         }
     };
 
-
     return (
-        <div style={{ padding: "2rem" }}>
-            <h2>
-                {mode === "email"
-                    ? isSignup
-                        ? "Sign Up with Email"
-                        : "Login with Email"
-                    : "Login with Phone"}
-            </h2>
+        <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            minHeight="100vh"
+            bgcolor="#f4f6f8"
+        >
+            <Card sx={{ width: 380, p: 2, borderRadius: 3, boxShadow: 3 }}>
+                <CardContent>
+                    {/* Logo + Heading */}
+                    <Box textAlign="center" mb={2}>
+                        <img src="/logo.png" alt="FleetPro" style={{ width: 60, height: 60 }} />
+                        <Typography variant="h5" fontWeight="bold" mt={1}>
+                            Welcome to FleetPro
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            Sign in to continue
+                        </Typography>
+                    </Box>
 
-            {/* Toggle between Email/Phone mode */}
-            <div style={{ marginBottom: "1rem" }}>
-                <button onClick={() => setMode("email")}>Use Email</button>
-                <button onClick={() => setMode("phone")}>Use Phone</button>
-            </div>
-
-            {mode === "email" ? (
-                <>
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <br />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <br />
-                    <button onClick={handleEmailAuth}>
-                        {isSignup ? "Sign Up" : "Login"}
-                    </button>
-                    <p
-                        onClick={() => setIsSignup(!isSignup)}
-                        style={{ cursor: "pointer" }}
+                    {/* Google login */}
+                    <Button
+                        fullWidth
+                        variant="outlined"
+                        startIcon={<GoogleIcon />}
+                        sx={{ mb: 2, textTransform: "none" }}
+                        onClick={handleGoogleAuth}
                     >
-                        {isSignup ? "Already have an account? Login" : "New user? Sign up"}
-                    </p>
-                </>
-            ) : (
-                <>
-                    <input
-                        type="text"
-                        placeholder="+1 555 555 5555"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                    />
-                    <button onClick={sendOtp}>Send OTP</button>
-                    <br />
-                    <input
-                        type="text"
-                        placeholder="Enter OTP"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                    />
-                    <button onClick={verifyOtp}>Verify OTP</button>
-                    <div id="recaptcha-container"></div>
-                </>
-            )}
-            <hr style={{ margin: "2rem 0" }} />
-            <button onClick={handleGoogleAuth}>Sign in with Google</button>
-        </div>
+                        Continue with Google
+                    </Button>
+
+                    <Divider sx={{ my: 2 }}>OR</Divider>
+
+                    {/* Toggle Email/Phone */}
+                    <Tabs
+                        value={mode}
+                        onChange={(_, val) => setMode(val)}
+                        variant="fullWidth"
+                        sx={{ mb: 2 }}
+                    >
+                        <Tab label="Email" value="email" />
+                        <Tab label="Phone" value="phone" />
+                    </Tabs>
+
+                    {/* Email form */}
+                    {mode === "email" && (
+                        <>
+                            <TextField
+                                fullWidth
+                                label="Email"
+                                type="email"
+                                margin="normal"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                            <TextField
+                                fullWidth
+                                label="Password"
+                                type="password"
+                                margin="normal"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                sx={{ mt: 2 }}
+                                onClick={handleEmailAuth}
+                            >
+                                {isSignup ? "Sign Up" : "Sign In"}
+                            </Button>
+                            <Box
+                                textAlign="center"
+                                mt={2}
+                                sx={{ cursor: "pointer" }}
+                                onClick={() => setIsSignup(!isSignup)}
+                            >
+                                <Typography variant="body2" color="primary">
+                                    {isSignup
+                                        ? "Already have an account? Login"
+                                        : "Need an account? Sign up"}
+                                </Typography>
+                            </Box>
+                        </>
+                    )}
+
+                    {/* Phone form */}
+                    {mode === "phone" && (
+                        <>
+                            <TextField
+                                fullWidth
+                                label="Phone number"
+                                placeholder="+1 555 555 5555"
+                                margin="normal"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                            />
+                            <Button fullWidth variant="outlined" onClick={sendOtp}>
+                                Send OTP
+                            </Button>
+                            <TextField
+                                fullWidth
+                                label="OTP"
+                                placeholder="Enter OTP"
+                                margin="normal"
+                                value={otp}
+                                onChange={(e) => setOtp(e.target.value)}
+                            />
+                            <Button fullWidth variant="contained" sx={{ mt: 1 }} onClick={verifyOtp}>
+                                Verify & Sign In
+                            </Button>
+                            <div id="recaptcha-container"></div>
+                        </>
+                    )}
+
+                    {/* Footer */}
+                    <Box display="flex" justifyContent="space-between" mt={2}>
+                        <Typography variant="body2" color="primary" sx={{ cursor: "pointer" }}>
+                            Forgot password?
+                        </Typography>
+                    </Box>
+                </CardContent>
+            </Card>
+        </Box>
     );
 };
 
