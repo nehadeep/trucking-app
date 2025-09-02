@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     Box,
     Button,
@@ -28,6 +29,8 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 
 const Auth: React.FC = () => {
+    const navigate = useNavigate();
+
     const { enqueueSnackbar } = useSnackbar();
 
     const [mode, setMode] = useState<"email" | "phone">("email");
@@ -88,13 +91,18 @@ const Auth: React.FC = () => {
                 // 🔍 Check Firestore for superadmin role
                 const docRef = doc(db, "superadmin", user.uid); //this only pulls
                 const snap = await getDoc(docRef);
+                console.log("snap data", snap)
 
                 if (snap.exists() && snap.data().role === "superadmin") {
                     enqueueSnackbar("Superadmin login successful ✅", { variant: "success" });
-                    // ✅ redirect to superadmin dashboard
-                    // e.g., navigate("/superadmin-dashboard")
+
+                    navigate("/superadmin");
+                }  else if (snap.exists() && snap.data().role === "admin") {
+                    enqueueSnackbar("Admin login successful ✅", { variant: "success" });
+
+                    navigate("/admin");
                 } else {
-                    enqueueSnackbar("You are not authorized as superadmin ❌", { variant: "error" });
+                    enqueueSnackbar("You are not authorized as superadmin, admin or Driver ❌", { variant: "error" });
                     await auth.signOut();
                 }
             }
