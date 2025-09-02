@@ -96,11 +96,11 @@ const Auth: React.FC = () => {
                 if (snap.exists() && snap.data().role === "superadmin") {
                     enqueueSnackbar("Superadmin login successful ✅", { variant: "success" });
 
-                    navigate("/superadmin");
+                    navigate("/console/superadmin");
                 }  else if (snap.exists() && snap.data().role === "admin") {
                     enqueueSnackbar("Admin login successful ✅", { variant: "success" });
 
-                    navigate("/admin");
+                    navigate("/console/admin");
                 } else {
                     enqueueSnackbar("You are not authorized as superadmin, admin or Driver ❌", { variant: "error" });
                     await auth.signOut();
