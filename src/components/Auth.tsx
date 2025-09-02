@@ -8,7 +8,7 @@ import {
     Tab,
     Tabs,
     TextField,
-    Typography,
+    Typography, IconButton, InputAdornment
 } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
 import { useSnackbar } from "notistack";
@@ -21,8 +21,10 @@ import {
     signInWithPopup,
 } from "firebase/auth";
 import { auth } from "../firebaseConfig";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 
 const Auth: React.FC = () => {
@@ -39,30 +41,79 @@ const Auth: React.FC = () => {
     const [phone, setPhone] = useState("");
     const [otp, setOtp] = useState("");
     const [confirmationResult, setConfirmationResult] = useState<any>(null);
+    const [showPassword, setShowPassword] = useState(false);
+
+
+    const validateEmail = (email: string) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    };
+
+    const validatePassword = (password: string) => {
+        return password.length >= 6; // Firebase minimum
+        // You can add more rules: e.g. /^(?=.*[A-Z])(?=.*\d).{6,}$/ for uppercase+number
+    };
+
 
     // Email/Password auth
     const handleEmailAuth = async () => {
         try {
             if (isSignup) {
-                await createUserWithEmailAndPassword(auth, email, password);
-                enqueueSnackbar("User registered successfully ✅", { variant: "success" });
+                // ✅ Frontend validation
+                if (!validateEmail(email)) {
+                    enqueueSnackbar("Please enter a valid email address ❌", { variant: "error" });
+                    return;
+                }
+                if (!validatePassword(password)) {
+                    enqueueSnackbar("Password must be at least 6 characters ❌", { variant: "error" });
+                    return;
+                }
+
+
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // ✅ Save to Firestore in "superadmins"
+                // await setDoc(doc(db, "superadmins", user.uid), {
+                //     email: user.email,
+                //     role: "superadmin",
+                //     createdAt: new Date(),
+                // });
+
+                enqueueSnackbar(`${user.email} registered successfully ✅`, { variant: "success" });
             } else {
-                await signInWithEmailAndPassword(auth, email, password);
-                enqueueSnackbar("Login successful ✅", { variant: "success" });
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 🔍 Check Firestore for superadmin role
+                const docRef = doc(db, "superadmin", user.uid); //this only pulls
+                const snap = await getDoc(docRef);
+
+                if (snap.exists() && snap.data().role === "superadmin") {
+                    enqueueSnackbar("Superadmin login successful ✅", { variant: "success" });
+                    // ✅ redirect to superadmin dashboard
+                    // e.g., navigate("/superadmin-dashboard")
+                } else {
+                    enqueueSnackbar("You are not authorized as superadmin ❌", { variant: "error" });
+                    await auth.signOut();
+                }
             }
         } catch (error:any) {
             switch (error.code) {
-                case "auth/user-not-found":
-                    enqueueSnackbar("This email is not registered ❌", { variant: "error" });
+                case "auth/invalid-email":
+                    enqueueSnackbar("Invalid email format ❌", { variant: "error" });
+                    break;
+                case "auth/weak-password":
+                    enqueueSnackbar("Password must be at least 6 characters ❌", { variant: "error" });
                     break;
                 case "auth/wrong-password":
                     enqueueSnackbar("Incorrect password ❌", { variant: "error" });
                     break;
+                case "auth/user-not-found":
+                    enqueueSnackbar("This email is not registered ❌", { variant: "error" });
+                    break;
                 case "auth/email-already-in-use":
                     enqueueSnackbar("This email is already registered ❌", { variant: "error" });
-                    break;
-                case "auth/weak-password":
-                    enqueueSnackbar("Password should be at least 6 characters ❌", { variant: "warning" });
                     break;
                 default:
                     enqueueSnackbar("Something went wrong, try again ❌", { variant: "error" });
@@ -144,6 +195,8 @@ const Auth: React.FC = () => {
         }
     };
 
+
+
     return (
         <Box
             display="flex"
@@ -203,10 +256,23 @@ const Auth: React.FC = () => {
                             <TextField
                                 fullWidth
                                 label="Password"
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 margin="normal"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                edge="end"
+                                            >
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                             <Button
                                 fullWidth
@@ -216,18 +282,7 @@ const Auth: React.FC = () => {
                             >
                                 {isSignup ? "Sign Up" : "Sign In"}
                             </Button>
-                            <Box
-                                textAlign="center"
-                                mt={2}
-                                sx={{ cursor: "pointer" }}
-                                onClick={() => setIsSignup(!isSignup)}
-                            >
-                                <Typography variant="body2" color="primary">
-                                    {isSignup
-                                        ? "Already have an account? Login"
-                                        : "Need an account? Sign up"}
-                                </Typography>
-                            </Box>
+
                         </>
                     )}
 
@@ -254,13 +309,26 @@ const Auth: React.FC = () => {
                                 onChange={(e) => setOtp(e.target.value)}
                             />
                             <Button fullWidth variant="contained" sx={{ mt: 1 }} onClick={verifyOtp}>
-                                Verify & Sign In
+                                {isSignup? "Verify & Sign Up": "Verify & Sign In"}
                             </Button>
                             <div id="recaptcha-container"></div>
                         </>
                     )}
 
                     {/* Footer */}
+                    <Box
+                        textAlign="center"
+                        mt={2}
+                        sx={{ cursor: "pointer" }}
+                        onClick={() => setIsSignup(!isSignup)}
+                    >
+                        <Typography variant="body2" color="primary">
+                            {isSignup
+                                ? "Already have an account? Login"
+                                : "Need an account? Sign up"}
+                        </Typography>
+                    </Box>
+
                     <Box display="flex" justifyContent="space-between" mt={2}>
                         <Typography variant="body2" color="primary" sx={{ cursor: "pointer" }}>
                             Forgot password?

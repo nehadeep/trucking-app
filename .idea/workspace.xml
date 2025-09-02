@@ -51,7 +51,7 @@
       <option name="presentableId" value="Default" />
       <updated>1756686857187</updated>
       <workItem from="1756686859113" duration="9496000" />
-      <workItem from="1756768272843" duration="1158000" />
+      <workItem from="1756768272843" duration="6284000" />
     </task>
     <task id="LOCAL-00001" summary="test">
       <created>1756768623038</created>
@@ -60,7 +60,14 @@
       <option name="project" value="LOCAL" />
       <updated>1756768623038</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="added the styles to the login page">
+      <created>1756769678895</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1756769678895</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -68,7 +75,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="test" />
-    <option name="LAST_COMMIT_MESSAGE" value="test" />
+    <MESSAGE value="added the styles to the login page" />
+    <option name="LAST_COMMIT_MESSAGE" value="added the styles to the login page" />
   </component>
   <component name="WindowStateProjectService">
     <state x="2374" y="336" key="#Notifications" timestamp="1756768735126">
@@ -84,6 +92,10 @@
     </state>
     <state x="2326" y="234" key="CommitChangelistDialog2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1756768622584" />
     <state x="2326" y="234" key="CommitChangelistDialog2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756757756688" />
+    <state x="1947" y="236" width="1591" height="779" key="DiffContextDialog" timestamp="1756832219818">
+      <screen x="1792" y="136" width="1920" height="1055" />
+    </state>
+    <state x="1947" y="236" width="1591" height="779" key="DiffContextDialog/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1756832219818" />
     <state x="2595" y="532" width="594" height="280" key="Github.ShareDialog" timestamp="1756768582779">
       <screen x="1792" y="136" width="1920" height="1055" />
     </state>
