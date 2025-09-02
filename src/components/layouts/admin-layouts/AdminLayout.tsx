@@ -1,9 +1,7 @@
-import React, { useState } from "react";
-import { Outlet, Link, useLocation } from "react-router-dom";
+import React from "react";
+import { Outlet, Link, useLocation, useOutletContext } from "react-router-dom";
 import {
-    AppBar,
     Toolbar,
-    IconButton,
     Typography,
     Drawer,
     List,
@@ -14,7 +12,6 @@ import {
     CssBaseline,
     Box,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
@@ -22,6 +19,7 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import MapIcon from "@mui/icons-material/Map";
 import RouteIcon from "@mui/icons-material/AltRoute";
 import SettingsIcon from "@mui/icons-material/Settings";
+import { OutletContextType } from "../console-layouts/ConsoleLayout";
 
 const drawerWidth = 240;
 
@@ -36,7 +34,8 @@ const navItems = [
 ];
 
 const AdminLayout: React.FC = () => {
-    const [mobileOpen, setMobileOpen] = useState(false);
+    const { mobileOpen, handleDrawerToggle } =
+        useOutletContext<OutletContextType>();
     const location = useLocation();
 
     const drawer = (
@@ -51,6 +50,18 @@ const AdminLayout: React.FC = () => {
                             component={Link}
                             to={item.path}
                             selected={location.pathname.includes(item.path)}
+                            sx={{
+                                "&.Mui-selected": {
+                                    bgcolor: "primary.main",
+                                    color: "white",
+                                    "& .MuiListItemIcon-root": {
+                                        color: "white",
+                                    },
+                                },
+                                "&.Mui-selected:hover": {
+                                    bgcolor: "primary.dark",
+                                },
+                            }}
                         >
                             <ListItemIcon>{item.icon}</ListItemIcon>
                             <ListItemText primary={item.text} />
@@ -65,27 +76,11 @@ const AdminLayout: React.FC = () => {
         <Box sx={{ display: "flex" }}>
             <CssBaseline />
 
-            {/* Top bar for mobile */}
-            <AppBar position="fixed" sx={{ display: { sm: "none" } }}>
-                <Toolbar>
-                    <IconButton
-                        color="inherit"
-                        edge="start"
-                        onClick={() => setMobileOpen(!mobileOpen)}
-                    >
-                        <MenuIcon />
-                    </IconButton>
-                    <Typography variant="h6" noWrap>
-                        Admin Panel
-                    </Typography>
-                </Toolbar>
-            </AppBar>
-
             {/* Drawer for mobile */}
             <Drawer
                 variant="temporary"
                 open={mobileOpen}
-                onClose={() => setMobileOpen(false)}
+                onClose={handleDrawerToggle}
                 sx={{
                     display: { xs: "block", sm: "none" },
                     "& .MuiDrawer-paper": { width: drawerWidth },
@@ -107,8 +102,15 @@ const AdminLayout: React.FC = () => {
             </Drawer>
 
             {/* Page Content */}
-            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                <Toolbar /> {/* keeps content below AppBar */}
+            <Box
+                component="main"
+                sx={{
+                    flexGrow: 1,
+                    p: 3,
+                    ml: { sm: `${drawerWidth}px` }, // offset so content isn’t hidden
+                    minHeight: "100vh",
+                }}
+            >
                 <Outlet />
             </Box>
         </Box>

@@ -1,9 +1,7 @@
-import React, { useState } from "react";
-import { Outlet, Link, useLocation } from "react-router-dom";
+import React from "react";
+import { Outlet, Link, useLocation, useOutletContext } from "react-router-dom";
 import {
-    AppBar,
     Toolbar,
-    IconButton,
     Typography,
     Drawer,
     List,
@@ -14,9 +12,9 @@ import {
     CssBaseline,
     Box,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import SettingsIcon from "@mui/icons-material/Settings";
 import MailIcon from "@mui/icons-material/Mail";
+import { OutletContextType } from "../console-layouts/ConsoleLayout";
 
 const drawerWidth = 240;
 
@@ -26,7 +24,9 @@ const navItems = [
 ];
 
 const SuperadminLayout: React.FC = () => {
-    const [mobileOpen, setMobileOpen] = useState(false);
+
+    const { mobileOpen, handleDrawerToggle } = useOutletContext<OutletContextType>();
+
     const location = useLocation();
 
     const drawer = (
@@ -66,27 +66,12 @@ const SuperadminLayout: React.FC = () => {
     return (
         <Box sx={{ display: "flex" }}>
             <CssBaseline />
-            {/* AppBar for mobile */}
-            <AppBar position="fixed" sx={{ display: { sm: "none" } }}>
-                <Toolbar>
-                    <IconButton
-                        color="inherit"
-                        edge="start"
-                        onClick={() => setMobileOpen(!mobileOpen)}
-                    >
-                        <MenuIcon />
-                    </IconButton>
-                    <Typography variant="h6" noWrap>
-                        Superadmin Panel
-                    </Typography>
-                </Toolbar>
-            </AppBar>
 
             {/* Drawer for mobile */}
             <Drawer
                 variant="temporary"
                 open={mobileOpen}
-                onClose={() => setMobileOpen(false)}
+                onClose={handleDrawerToggle}
                 sx={{
                     display: { xs: "block", sm: "none" },
                     "& .MuiDrawer-paper": { width: drawerWidth },
@@ -114,10 +99,9 @@ const SuperadminLayout: React.FC = () => {
                     flexGrow: 1,
                     p: 3,
                     ml: { sm: `${drawerWidth}px` }, // offset so content isn’t hidden
-                    minHeight: "100vh"
+                    minHeight: "100vh",
                 }}
             >
-                <Toolbar />
                 <Outlet />
             </Box>
         </Box>
