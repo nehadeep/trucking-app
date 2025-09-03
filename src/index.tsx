@@ -12,7 +12,19 @@ import { SnackbarProvider } from "notistack";
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
-const theme = createTheme();
+
+const theme = createTheme({
+    components: {
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    textTransform: "none",
+                    fontWeight: 500,
+                },
+            },
+        },
+    },
+} as any);
 
 root.render(
   <React.StrictMode>
