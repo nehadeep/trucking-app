@@ -15,6 +15,8 @@ import RoutesPage from "./components/layouts/admin-layouts/RoutesPage";
 import Trips from "./components/layouts/admin-layouts/Trips";
 import AdminSettings from "./components/layouts/admin-layouts/Settings";
 
+import SendInvitation from "./components/layouts/superadmin-layouts/Invites/SendInvitation";
+import InvitationStatus from "./components/layouts/superadmin-layouts/Invites/InvitationStatus";
 
 const App: React.FC = () => {
   return (
@@ -29,7 +31,11 @@ const App: React.FC = () => {
             <Route path="superadmin" element={<SuperadminLayout />}>
                 <Route index element={<Navigate to="settings" />} />
                 <Route path="settings" element={<Settings />} />
-                <Route path="invites" element={<Invites />} />
+                <Route path="invites" element={<Invites />} >
+                    <Route index element={<SendInvitation />} /> {/* default tab */}
+                    <Route path="send" element={<SendInvitation />} />
+                    <Route path="status" element={<InvitationStatus />} />
+                </Route>
             </Route>
 
             {/* Admin routes */}
