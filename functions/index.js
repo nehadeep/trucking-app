@@ -3,8 +3,8 @@
 const functions = require("firebase-functions");
 const nodemailer = require("nodemailer");
 
-const gmailUser = functions.config().email.user;
-const gmailPass = functions.config().email.pass;
+const gmailUser = process.env.EMAIL_USER;
+const gmailPass = process.env.EMAIL_PASS;
 
 // Nodemailer transport using Gmail
 const transporter = nodemailer.createTransport({
