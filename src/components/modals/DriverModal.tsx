@@ -4,9 +4,10 @@ import {
     DialogTitle,
     DialogContent,
     TextField,
-    MenuItem,
-    Button, DialogActions, Typography, Grid,
+    MenuItem, IconButton,
+    Button, DialogActions, Typography, Grid, Box,
 } from "@mui/material";
+
 import { db, storage } from "../../firebaseConfig"; // adjust path
 import { collection,
     addDoc,
@@ -23,6 +24,10 @@ import {
     isValidLicenseNumber,
     isValidSSN,
 } from "../../utils/validators";
+import CloseIcon from "@mui/icons-material/Close";
+import { useTheme } from "@mui/material/styles";
+import PersonIcon from "@mui/icons-material/Person";
+
 
 interface DriverModalProps {
     open: boolean;
@@ -34,12 +39,13 @@ interface DriverModalProps {
 
 
 const DriverModal: React.FC<DriverModalProps> = ({
-                                             open,
-                                             onClose,
-                                             adminId,
-                                             driverData,
-                                             onSaved,
+                                                     open,
+                                                     onClose,
+                                                     adminId,
+                                                     driverData,
+                                                     onSaved,
                                                  }) => {
+    const theme = useTheme();
     const [form, setForm] = useState({
         fullName: "",
         phone: "",
@@ -59,7 +65,7 @@ const DriverModal: React.FC<DriverModalProps> = ({
     const [licenseBack, setLicenseBack] = useState<File | null>(null);
     const [ssnDoc, setSsnDoc] = useState<File | null>(null);
 
-    // Prefill form if editing
+    // ✅ preload data in edit mode
     useEffect(() => {
         if (driverData) {
             setForm({
@@ -111,7 +117,6 @@ const DriverModal: React.FC<DriverModalProps> = ({
 
     const handleSave = async () => {
         if (!validate()) return;
-
         try {
             let driverPhotoUrl = driverData?.driverPhotoUrl || "";
             let licenseFrontUrl = driverData?.licenseFrontUrl || "";
@@ -127,9 +132,7 @@ const DriverModal: React.FC<DriverModalProps> = ({
             if (ssnDoc) ssnDocUrl = await uploadFile(ssnDoc, "ssnDoc");
 
             if (driverData?.id) {
-                // 🔄 Update existing driver
-                const driverRef = doc(db, "admins", adminId, "drivers", driverData.id);
-                await updateDoc(driverRef, {
+                await updateDoc(doc(db, "admins", adminId, "drivers", driverData.id), {
                     ...form,
                     totalMiles: Number(form.totalMiles),
                     updatedAt: serverTimestamp(),
@@ -139,7 +142,6 @@ const DriverModal: React.FC<DriverModalProps> = ({
                     ssnDocUrl,
                 });
             } else {
-                // ➕ Add new driver
                 await addDoc(collection(db, "admins", adminId, "drivers"), {
                     ...form,
                     totalMiles: Number(form.totalMiles),
@@ -150,9 +152,8 @@ const DriverModal: React.FC<DriverModalProps> = ({
                     ssnDocUrl,
                 });
             }
-
             onClose();
-            if (onSaved) onSaved(); // refresh parent
+            if (onSaved) onSaved();
         } catch (error) {
             console.error("❌ Error saving driver:", error);
         }
@@ -160,11 +161,30 @@ const DriverModal: React.FC<DriverModalProps> = ({
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-            <DialogTitle>{driverData ? "Edit Driver" : "Add Driver"}</DialogTitle>
+            <DialogTitle
+                sx={{
+                    bgcolor: theme.palette.primary.main,
+                    color: theme.palette.primary.contrastText,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                }}
+            >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <PersonIcon sx={{ color: theme.palette.primary.contrastText }} />
+                    {driverData ? "Edit Driver" : "Add Driver"}
+                </Box>
+                <IconButton
+                    onClick={onClose}
+                    sx={{ color: theme.palette.primary.contrastText }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            </DialogTitle>
             <DialogContent>
-                <Grid container spacing={2} sx={{ mt: 1 }} {...({} as any)}>
-                    {/* Basic Info */}
-                    <Grid item xs={12} sm={6} {...({} as any)}>
+                <Grid container spacing={2} sx={{ mt: 1 }}>
+                    {/* Row 1 */}
+                    <Grid item xs={12} sm={6}>
                         <TextField
                             label="Full Name *"
                             name="fullName"
@@ -175,7 +195,7 @@ const DriverModal: React.FC<DriverModalProps> = ({
                             helperText={errors.fullName}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6} {...({} as any)}>
+                    <Grid item xs={12} sm={6}>
                         <TextField
                             label="Phone Number *"
                             name="phone"
@@ -187,7 +207,8 @@ const DriverModal: React.FC<DriverModalProps> = ({
                         />
                     </Grid>
 
-                    <Grid item xs={12} {...({} as any)}>
+                    {/* Row 2 */}
+                    <Grid item xs={12}>
                         <TextField
                             label="Email Address *"
                             name="email"
@@ -199,7 +220,8 @@ const DriverModal: React.FC<DriverModalProps> = ({
                         />
                     </Grid>
 
-                    <Grid item xs={12} {...({} as any)}>
+                    {/* Row 3 */}
+                    <Grid item xs={12}>
                         <TextField
                             label="Address"
                             name="address"
@@ -207,69 +229,12 @@ const DriverModal: React.FC<DriverModalProps> = ({
                             onChange={handleChange}
                             fullWidth
                             multiline
-                            minRows={2}
+                            minRows={3}
                         />
                     </Grid>
 
-                    <Grid item xs={12} sm={6} {...({} as any)}>
-                        <TextField
-                            label="SSN *"
-                            name="ssn"
-                            value={form.ssn}
-                            onChange={handleChange}
-                            fullWidth
-                            error={!!errors.ssn}
-                            helperText={errors.ssn}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6} {...({} as any)}>
-                        <TextField
-                            label="License Number *"
-                            name="licenseNumber"
-                            value={form.licenseNumber}
-                            onChange={handleChange}
-                            fullWidth
-                            error={!!errors.licenseNumber}
-                            helperText={errors.licenseNumber}
-                        />
-                    </Grid>
-
-                    {/* Dates */}
-                    <Grid item xs={12} sm={6} {...({} as any)}>
-                        <TextField
-                            label="License Expiry"
-                            name="licenseExpiry"
-                            type="date"
-                            value={form.licenseExpiry}
-                            onChange={handleChange}
-                            fullWidth
-                            InputLabelProps={{ shrink: true }}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6} {...({} as any)}>
-                        <TextField
-                            label="Hire Date"
-                            name="hireDate"
-                            type="date"
-                            value={form.hireDate}
-                            onChange={handleChange}
-                            fullWidth
-                            InputLabelProps={{ shrink: true }}
-                        />
-                    </Grid>
-
-                    {/* Other Info */}
-                    <Grid item xs={12} sm={6} {...({} as any)}>
-                        <TextField
-                            label="Total Miles"
-                            name="totalMiles"
-                            value={form.totalMiles}
-                            onChange={handleChange}
-                            fullWidth
-                        />
-                    </Grid>
-
-                    <Grid item xs={12} sm={6} {...({} as any)}>
+                    {/* Row 4 */}
+                    <Grid item xs={12} sm={4}>
                         <TextField
                             select
                             label="Status"
@@ -283,121 +248,203 @@ const DriverModal: React.FC<DriverModalProps> = ({
                             <MenuItem value="Inactive">Inactive</MenuItem>
                         </TextField>
                     </Grid>
-
-                    {/* File Uploads with Previews */}
-                    <Grid item xs={12} sm={6} {...({} as any)}>
-                        <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                            Driver Photo
-                        </Typography>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => setDriverPhoto(e.target.files?.[0] || null)}
+                    <Grid item xs={12} sm={4}>
+                        <TextField
+                            label="Hire Date"
+                            name="hireDate"
+                            type="date"
+                            value={form.hireDate}
+                            onChange={handleChange}
+                            fullWidth
+                            InputLabelProps={{ shrink: true }}
                         />
-                        {(driverPhoto || driverData?.driverPhotoUrl) && (
-                            <img
-                                src={
-                                    driverPhoto
-                                        ? URL.createObjectURL(driverPhoto)
-                                        : driverData.driverPhotoUrl
-                                }
-                                alt="Driver Preview"
-                                style={{
-                                    width: "100%",
-                                    marginTop: 8,
-                                    borderRadius: 8,
-                                    border: "1px solid #ccc",
-                                }}
-                            />
-                        )}
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                        <TextField
+                            label="Total Miles"
+                            name="totalMiles"
+                            value={form.totalMiles}
+                            onChange={handleChange}
+                            fullWidth
+                        />
                     </Grid>
 
-                    <Grid item xs={12} sm={6} {...({} as any)}>
+                    {/* Row 5 */}
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            label="License Number *"
+                            name="licenseNumber"
+                            value={form.licenseNumber}
+                            onChange={handleChange}
+                            fullWidth
+                            error={!!errors.licenseNumber}
+                            helperText={errors.licenseNumber}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            label="License Expiry"
+                            name="licenseExpiry"
+                            type="date"
+                            value={form.licenseExpiry}
+                            onChange={handleChange}
+                            fullWidth
+                            InputLabelProps={{ shrink: true }}
+                        />
+                    </Grid>
+
+                    {/* Row 6 */}
+                    <Grid item xs={12} sm={6}>
                         <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
                             License Front
                         </Typography>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => setLicenseFront(e.target.files?.[0] || null)}
-                        />
-                        {(licenseFront || driverData?.licenseFrontUrl) && (
-                            <img
-                                src={
-                                    licenseFront
-                                        ? URL.createObjectURL(licenseFront)
-                                        : driverData.licenseFrontUrl
-                                }
-                                alt="License Front Preview"
-                                style={{
-                                    width: "100%",
-                                    marginTop: 8,
-                                    borderRadius: 8,
-                                    border: "1px solid #ccc",
-                                }}
+                        <Box
+                            sx={{
+                                border: "1px dashed #aaa",
+                                borderRadius: 2,
+                                p: 2,
+                                textAlign: "center",
+                            }}
+                        >
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setLicenseFront(e.target.files?.[0] || null)}
                             />
-                        )}
+                            {(licenseFront || driverData?.licenseFrontUrl) && (
+                                <img
+                                    src={
+                                        licenseFront
+                                            ? URL.createObjectURL(licenseFront)
+                                            : driverData.licenseFrontUrl
+                                    }
+                                    alt="License Front"
+                                    style={{ width: "100%", marginTop: 8, borderRadius: 8 }}
+                                />
+                            )}
+                        </Box>
                     </Grid>
-
-                    <Grid item xs={12} sm={6} {...({} as any)}>
+                    <Grid item xs={12} sm={6}>
                         <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
                             License Back
                         </Typography>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => setLicenseBack(e.target.files?.[0] || null)}
-                        />
-                        {(licenseBack || driverData?.licenseBackUrl) && (
-                            <img
-                                src={
-                                    licenseBack
-                                        ? URL.createObjectURL(licenseBack)
-                                        : driverData.licenseBackUrl
-                                }
-                                alt="License Back Preview"
-                                style={{
-                                    width: "100%",
-                                    marginTop: 8,
-                                    borderRadius: 8,
-                                    border: "1px solid #ccc",
-                                }}
+                        <Box
+                            sx={{
+                                border: "1px dashed #aaa",
+                                borderRadius: 2,
+                                p: 2,
+                                textAlign: "center",
+                            }}
+                        >
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setLicenseBack(e.target.files?.[0] || null)}
                             />
-                        )}
+                            {(licenseBack || driverData?.licenseBackUrl) && (
+                                <img
+                                    src={
+                                        licenseBack
+                                            ? URL.createObjectURL(licenseBack)
+                                            : driverData.licenseBackUrl
+                                    }
+                                    alt="License Back"
+                                    style={{ width: "100%", marginTop: 8, borderRadius: 8 }}
+                                />
+                            )}
+                        </Box>
                     </Grid>
 
-                    <Grid item xs={12} sm={6} {...({} as any)}>
+                    {/* Row 7 */}
+                    <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                            Social Security Number
+                        </Typography>
+                        <TextField
+                            label="SSN *"
+                            name="ssn"
+                            value={form.ssn}
+                            onChange={handleChange}
+                            fullWidth
+                            error={!!errors.ssn}
+                            helperText={errors.ssn}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
                         <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
                             SSN Document
                         </Typography>
-                        <input
-                            type="file"
-                            accept="image/*,.pdf"
-                            onChange={(e) => setSsnDoc(e.target.files?.[0] || null)}
-                        />
-                        {(ssnDoc || driverData?.ssnDocUrl) && (
-                            <img
-                                src={
-                                    ssnDoc
-                                        ? URL.createObjectURL(ssnDoc)
-                                        : driverData.ssnDocUrl
-                                }
-                                alt="SSN Preview"
-                                style={{
-                                    width: "100%",
-                                    marginTop: 8,
-                                    borderRadius: 8,
-                                    border: "1px solid #ccc",
-                                }}
+                        <Box
+                            sx={{
+                                border: "1px dashed #aaa",
+                                borderRadius: 2,
+                                p: 2,
+                                textAlign: "center",
+                            }}
+                        >
+                            <input
+                                type="file"
+                                accept="image/*,.pdf"
+                                onChange={(e) => setSsnDoc(e.target.files?.[0] || null)}
                             />
-                        )}
+                            {(ssnDoc || driverData?.ssnDocUrl) && (
+                                <img
+                                    src={
+                                        ssnDoc
+                                            ? URL.createObjectURL(ssnDoc)
+                                            : driverData.ssnDocUrl
+                                    }
+                                    alt="SSN Preview"
+                                    style={{ width: "100%", marginTop: 8, borderRadius: 8 }}
+                                />
+                            )}
+                        </Box>
+                    </Grid>
+
+                    {/* Row 8 */}
+                    <Grid item xs={12}>
+                        <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                            Driver Photo
+                        </Typography>
+                        <Box
+                            sx={{
+                                border: "1px dashed #aaa",
+                                borderRadius: 2,
+                                p: 2,
+                                textAlign: "center",
+                            }}
+                        >
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setDriverPhoto(e.target.files?.[0] || null)}
+                            />
+                            {(driverPhoto || driverData?.driverPhotoUrl) && (
+                                <img
+                                    src={
+                                        driverPhoto
+                                            ? URL.createObjectURL(driverPhoto)
+                                            : driverData.driverPhotoUrl
+                                    }
+                                    alt="Driver Preview"
+                                    style={{ width: "40%", marginTop: 8, borderRadius: 8 }}
+                                />
+                            )}
+                        </Box>
                     </Grid>
                 </Grid>
             </DialogContent>
 
             <DialogActions>
-                <Button onClick={onClose} sx={{ textTransform: "none" }}>Cancel</Button>
-                <Button variant="contained" color="primary" onClick={handleSave} sx={{ textTransform: "none" }}>
+                <Button onClick={onClose}>
+                    Cancel
+                </Button>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSave}
+                    sx={{ textTransform: "none" }}
+                >
                     {driverData ? "Update Driver" : "Save Driver"}
                 </Button>
             </DialogActions>
