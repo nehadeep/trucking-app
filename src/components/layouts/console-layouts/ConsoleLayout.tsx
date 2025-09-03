@@ -68,7 +68,16 @@ const ConsoleLayout: React.FC = () => {
             </AppBar>
 
             {/* Main content area */}
-            <Box sx={{ flex: 1, display: "flex" }}>
+            <Box
+                sx={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column", // ✅ stack children vertically
+                    width: "100%",           // ✅ force Outlet to take full width
+                    minHeight: "100vh",      // optional, ensures full page height
+                }}
+
+            >
                 <Outlet context={{ mobileOpen, handleDrawerToggle } as OutletContextType} />
             </Box>
 

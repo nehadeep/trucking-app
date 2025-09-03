@@ -106,8 +106,7 @@ const AdminLayout: React.FC = () => {
                 component="main"
                 sx={{
                     flexGrow: 1,
-                    p: 3,
-                    ml: { sm: `${drawerWidth}px` }, // offset so content isn’t hidden
+                    ml: { sm: `${drawerWidth}px` }, // ✅ offset for drawer
                     minHeight: "100vh",
                 }}
             >

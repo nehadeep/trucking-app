@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Button, TextField, Card, CardContent, Typography, Chip,Grid } from "@mui/material";
+import {Box,Button, TextField, Card, CardContent, Typography, Chip, Grid, InputAdornment, Paper} from "@mui/material";
 import { collection, getDocs } from "firebase/firestore";
 import { db, auth } from "../../../firebaseConfig";
 import DriverModal from "../../modals/DriverModal";
+import SearchIcon from "@mui/icons-material/Search";
 
 const Drivers: React.FC = () => {
     const [openAdd, setOpenAdd] = useState(false);
@@ -11,6 +12,7 @@ const Drivers: React.FC = () => {
 
     // ✅ Get logged-in adminId
     const adminId = auth.currentUser?.uid;
+    console.log("admins id", adminId)
 
     // 🔍 Load drivers from Firestore
     useEffect(() => {
@@ -33,27 +35,64 @@ const Drivers: React.FC = () => {
 
     return (
         <div style={{ padding: 24 }}>
-            <Typography variant="h4" gutterBottom>
-                Driver Management
-            </Typography>
+            {/* Header Row */}
+            <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mb={3}
+            >
+                <Box>
+                    <Typography variant="h5" fontWeight={700}>
+                        Driver Management
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Manage your fleet drivers and their information
+                    </Typography>
+                </Box>
 
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+                <Button
+                    variant="contained"
+                    color="primary" // 👈 will use your theme’s primary color
+                    sx={{
+                        textTransform: "none",
+                        borderRadius: "8px",
+                        px: 3,
+                        py: 1,
+                        fontWeight: 600,
+                    }}
+                    onClick={() => setOpenAdd(true)}
+                    disabled={!adminId}
+                >
+                    + Add Driver
+                </Button>
+            </Box>
+
+
+            {/* Search Bar */}
+            <Paper
+                elevation={1}
+                sx={{
+                    p: 2.5,
+                    borderRadius: "12px",
+                    mb: 3,
+                }}
+            >
                 <TextField
                     placeholder="Search drivers by name or license number..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     fullWidth
-                    style={{ marginRight: 16 }}
+                    variant="outlined"
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon color="action" />
+                            </InputAdornment>
+                        ),
+                    }}
                 />
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => setOpenAdd(true)}
-                    disabled={!adminId} // prevent adding until we know adminId
-                >
-                    + Add Driver
-                </Button>
-            </div>
+            </Paper>
 
             <Grid container spacing={2}>
                 {filteredDrivers.map((driver) => (
