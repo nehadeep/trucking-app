@@ -2,19 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6fb22449-834a-4b33-a53a-4727297f3d7e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.firebase/hosting.YnVpbGQ.cache" beforeDir="false" afterPath="$PROJECT_DIR$/.firebase/hosting.YnVpbGQ.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/firebase.json" beforeDir="false" afterPath="$PROJECT_DIR$/firebase.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/functions/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/functions/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/functions/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/functions/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/functions/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/functions/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/layouts/superadmin-layouts/Invites/SendInvitation.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/layouts/superadmin-layouts/Invites/SendInvitation.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Auth.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Auth.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/servics/inviteService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/servics/inviteService.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="trucking-app" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -63,7 +63,7 @@
       <option name="presentableId" value="Default" />
       <updated>1756686857187</updated>
       <workItem from="1756686859113" duration="9496000" />
-      <workItem from="1756768272843" duration="23691000" />
+      <workItem from="1756768272843" duration="29345000" />
     </task>
     <task id="LOCAL-00001" summary="test">
       <created>1756768623038</created>
@@ -114,7 +114,14 @@
       <option name="project" value="LOCAL" />
       <updated>1756860717567</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="added the firebase node mailer">
+      <created>1756866892668</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1756866892668</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -128,7 +135,8 @@
     <MESSAGE value="Added the common &quot;console&quot; playground for admin and superadmins" />
     <MESSAGE value="set up the header, footer and left navigation withiing the console" />
     <MESSAGE value="added the invitation page" />
-    <option name="LAST_COMMIT_MESSAGE" value="added the invitation page" />
+    <MESSAGE value="added the firebase node mailer" />
+    <option name="LAST_COMMIT_MESSAGE" value="added the firebase node mailer" />
   </component>
   <component name="WindowStateProjectService">
     <state x="2374" y="336" key="#Notifications" timestamp="1756768735126">
@@ -139,32 +147,37 @@
       <screen x="1792" y="136" width="1920" height="1055" />
     </state>
     <state x="2459" y="441" key="#com.intellij.fileTypes.FileTypeChooser/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756755571523" />
-    <state x="2326" y="234" key="CommitChangelistDialog2" timestamp="1756860717090">
+    <state x="2326" y="234" key="CommitChangelistDialog2" timestamp="1756866892307">
       <screen x="1792" y="136" width="1920" height="1055" />
     </state>
     <state x="2326" y="234" key="CommitChangelistDialog2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.0.1792.1051@1792.136.1920.1055" timestamp="1756848350420" />
     <state x="2326" y="234" key="CommitChangelistDialog2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1756852209951" />
-    <state x="2326" y="234" key="CommitChangelistDialog2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756860717090" />
-    <state x="1947" y="236" width="1591" height="779" key="DiffContextDialog" timestamp="1756832219818">
+    <state x="2326" y="234" key="CommitChangelistDialog2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756866892307" />
+    <state x="1947" y="236" width="1591" height="779" key="DiffContextDialog" timestamp="1756869351514">
       <screen x="1792" y="136" width="1920" height="1055" />
     </state>
     <state x="1947" y="236" width="1591" height="779" key="DiffContextDialog/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1756832219818" />
+    <state x="1947" y="236" width="1591" height="779" key="DiffContextDialog/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756869351514" />
     <state x="2595" y="532" width="594" height="280" key="Github.ShareDialog" timestamp="1756768582779">
       <screen x="1792" y="136" width="1920" height="1055" />
     </state>
     <state x="2595" y="532" key="Github.ShareDialog/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1756768582779" />
     <state x="2595" y="532" width="594" height="280" key="Github.ShareDialog/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756757638132" />
+    <state x="2513" y="344" key="RollbackChangesDialog" timestamp="1756869344973">
+      <screen x="1792" y="136" width="1920" height="1055" />
+    </state>
+    <state x="2513" y="344" key="RollbackChangesDialog/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756869344973" />
     <state x="2242" y="270" key="SettingsEditor" timestamp="1756768555759">
       <screen x="1792" y="136" width="1920" height="1055" />
     </state>
     <state x="2242" y="270" key="SettingsEditor/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1756768555759" />
     <state x="2242" y="270" key="SettingsEditor/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756757710957" />
-    <state x="2374" y="399" key="Vcs.Push.Dialog.v2" timestamp="1756860718974">
+    <state x="2374" y="399" key="Vcs.Push.Dialog.v2" timestamp="1756866894467">
       <screen x="1792" y="136" width="1920" height="1055" />
     </state>
     <state x="2374" y="399" key="Vcs.Push.Dialog.v2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.0.1792.1051@1792.136.1920.1055" timestamp="1756848352531" />
     <state x="2374" y="399" key="Vcs.Push.Dialog.v2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1756852211593" />
-    <state x="2374" y="399" key="Vcs.Push.Dialog.v2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756860718974" />
+    <state x="2374" y="399" key="Vcs.Push.Dialog.v2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756866894467" />
     <state x="2407" y="291" key="run.anything.popup" timestamp="1756846299819">
       <screen x="1792" y="136" width="1920" height="1055" />
     </state>

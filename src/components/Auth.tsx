@@ -19,7 +19,7 @@ import {
     RecaptchaVerifier,
     signInWithPhoneNumber,
     GoogleAuthProvider,
-    signInWithPopup,
+    signInWithPopup, fetchSignInMethodsForEmail
 } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -76,15 +76,36 @@ const Auth: React.FC = () => {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // ✅ Save to Firestore in "superadmins"
-                // await setDoc(doc(db, "superadmins", user.uid), {
-                //     email: user.email,
-                //     role: "superadmin",
-                //     createdAt: new Date(),
-                // });
+                type SuperAdmin = {
+                    email: string | null;
+                    role: string;
+                    createdAt: Date;
+                };
 
-                enqueueSnackbar(`${user.email} registered successfully ✅`, { variant: "success" });
+                const superAdminConverter = {
+                    toFirestore: (data: SuperAdmin) => data,
+                    fromFirestore: (snap: any) => snap.data() as SuperAdmin,
+                };
+                // Then use it:
+                const ref = doc(db, "superadmin", user.uid).withConverter(superAdminConverter);
+
+                await setDoc(ref, {
+                    email: user.email,
+                    role: "admin",
+                    createdAt: new Date(),
+                });
+
+                enqueueSnackbar(`${user.email} registered successfully. Please Sign In Now.`, { variant: "success" });
+                setIsSignup(false);
+
             } else {
+                // const methods = await fetchSignInMethodsForEmail(auth, email);
+                // console.log("mehodas email", methods)
+                // if (!methods || methods.length === 0) {
+                //     enqueueSnackbar("This email is not registered. Please Sign Up first.", { variant: "error" });
+                //     return;
+                // }
+
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 

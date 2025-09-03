@@ -19,6 +19,7 @@ export const sendInvite = async (
     });
 
     if (result.data.success) {
+        console.log("ersults", result)
         return true;
     } else {
         throw new Error(result.data.error);
