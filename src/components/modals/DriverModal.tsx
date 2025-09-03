@@ -22,7 +22,7 @@ import {
     formatPhoneNumber,
     isValidEmail,
     isValidLicenseNumber,
-    isValidSSN,
+    isValidSSN, formatSSN
 } from "../../utils/validators";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
@@ -80,13 +80,34 @@ const DriverModal: React.FC<DriverModalProps> = ({
                 status: driverData.status || "Active",
                 ssn: driverData.ssn || "",
             });
+        } else if (open) {
+            // Reset form in add mode
+            setForm({
+                fullName: "",
+                phone: "",
+                email: "",
+                address: "",
+                licenseNumber: "",
+                licenseExpiry: "",
+                hireDate: "",
+                totalMiles: "",
+                status: "Active",
+                ssn: "",
+            });
+
+            setDriverPhoto(null);
+            setLicenseFront(null);
+            setLicenseBack(null);
+            setSsnDoc(null);
+            setErrors({});
         }
-    }, [driverData]);
+    }, [driverData, open]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         let { name, value } = e.target;
         if (name === "phone") value = formatPhoneNumber(value);
         if (name === "licenseNumber") value = value.toUpperCase();
+        if (name === "ssn") value = formatSSN(value);
         setForm({ ...form, [name]: value });
     };
 
@@ -102,6 +123,9 @@ const DriverModal: React.FC<DriverModalProps> = ({
         if (!form.licenseNumber || !isValidLicenseNumber(form.licenseNumber))
             newErrors.licenseNumber =
                 "License number must be uppercase alphanumeric";
+        if (!form.licenseExpiry) {
+            newErrors.licenseExpiry = "License expiry date is required";
+        }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -290,6 +314,8 @@ const DriverModal: React.FC<DriverModalProps> = ({
                             onChange={handleChange}
                             fullWidth
                             InputLabelProps={{ shrink: true }}
+                            error={!!errors.licenseExpiry}
+                            helperText={errors.licenseExpiry}
                         />
                     </Grid>
 

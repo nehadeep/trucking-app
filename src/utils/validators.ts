@@ -26,3 +26,12 @@ export const isValidLicenseNumber = (value: string): boolean => {
 export const isValidSSN = (value: string): boolean => {
     return /^\d{3}-\d{2}-\d{4}$/.test(value);
 };
+
+export const formatSSN = (value: string): string => {
+    // remove non-digits
+    const digits = value.replace(/\D/g, "");
+    // format: ###-##-####
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 5) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5, 9)}`;
+};

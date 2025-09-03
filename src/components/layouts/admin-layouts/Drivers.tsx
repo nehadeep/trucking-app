@@ -12,19 +12,19 @@ const Drivers: React.FC = () => {
 
     // ✅ Get logged-in adminId
     const adminId = auth.currentUser?.uid;
-    console.log("admins id", adminId)
+    console.log("admins id", adminId);
 
-    // 🔍 Load drivers from Firestore
+    const fetchDrivers = async () => {
+        if (!adminId) return;
+        const snapshot = await getDocs(collection(db, "admins", adminId, "drivers"));
+        const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setDrivers(list);
+    };
+
     useEffect(() => {
-        const fetchDrivers = async () => {
-            if (!adminId) return;
-            const snapshot = await getDocs(collection(db, "admins", adminId, "drivers"));
-            const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            setDrivers(list);
-        };
-
         fetchDrivers();
-    }, [adminId, openAdd]); // re-fetch after modal closes
+    }, [adminId, openAdd]); // only on mount or admin change
+
 
     // 🔍 Filter by search
     const filteredDrivers = drivers.filter(
@@ -96,7 +96,7 @@ const Drivers: React.FC = () => {
 
             <Grid container spacing={2}>
                 {filteredDrivers.map((driver) => (
-                    <Grid item xs={12} md={4} key={driver.id} {...({} as any)} >
+                    <Grid item xs={12} md={4} key={driver.id}>
                         <Card>
                             <CardContent>
                                 <Typography variant="h6">{driver.fullName}</Typography>
@@ -133,6 +133,7 @@ const Drivers: React.FC = () => {
                     open={openAdd}
                     onClose={() => setOpenAdd(false)}
                     adminId={adminId}
+                    onSaved={fetchDrivers} // 👈 refresh list when driver is added/updated
                 />
             )}
         </div>
