@@ -16,8 +16,6 @@
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "firebase": "^12.2.1",
-    "firebase-admin": "^11.0.0",
-    "firebase-functions": "^4.0.0",
     "nodemailer": "^7.0.6",
     "notistack": "^3.0.2",
     "react": "^19.1.1",
@@ -33,9 +31,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
-  },
-  "engines": {
-    "node": "20"
   },
   "eslintConfig": {
     "extends": [

@@ -12,6 +12,7 @@ import {
 import { collection, addDoc, doc, setDoc } from "firebase/firestore";
 import { db, auth } from "../../../../firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
+import {sendInvite} from "../../../../servics/inviteService";
 
 
 const SendInvitation: React.FC = () => {
@@ -66,22 +67,22 @@ const SendInvitation: React.FC = () => {
             // 4️⃣ Generate invite link
             const inviteLink = `https://trucking-app-3e473.web.app/signup?companyId=${companyId}&token=${inviteToken}`;
 
-            await addDoc(collection(db, "mail"), {
-                to: [companyEmail],
-                from: "easietrucking@gmail.com", // ⚠️ must match verified sender in MailerSend
-                subject: "You’ve been invited to FleetPro 🚛",
-                text: `${customMessage}\n\nClick here to accept: ${inviteLink}`,
-                html: `
-                <p>${customMessage}</p>
-                <p>
-                  <a href="${inviteLink}" 
-                     style="display:inline-block;padding:10px 15px;background:#1976d2;color:#fff;text-decoration:none;border-radius:5px;">
-                    Accept Invitation
-                  </a>
-                </p>
-              `,
-            });
 
+            try {
+                await sendInvite(companyEmail, companyName, inviteLink, customMessage);
+                await setDoc(
+                    doc(db, "invitations", inviteRef.id),
+                    { status: "sent" },
+                    { merge: true }
+                );
+
+            } catch (emailError: any) {
+                await setDoc(
+                    doc(db, "invitations", inviteRef.id),
+                    { status: "failed", error: emailError.message },
+                    { merge: true }
+                );
+            }
 
             console.log("Invite created:", inviteRef.id, inviteLink);
 
