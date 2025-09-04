@@ -5,7 +5,7 @@ import {
     DialogContent,
     TextField,
     MenuItem, IconButton,
-    Button, DialogActions, Typography, Grid, Box,
+    Button, DialogActions, Typography, Grid, Box, CircularProgress,
 } from "@mui/material";
 
 import { db, storage } from "../../firebaseConfig"; // adjust path
@@ -64,6 +64,7 @@ const DriverModal: React.FC<DriverModalProps> = ({
     const [licenseFront, setLicenseFront] = useState<File | null>(null);
     const [licenseBack, setLicenseBack] = useState<File | null>(null);
     const [ssnDoc, setSsnDoc] = useState<File | null>(null);
+    const [loading, setLoading] = useState(false);
 
     // ✅ preload data in edit mode
     useEffect(() => {
@@ -141,6 +142,7 @@ const DriverModal: React.FC<DriverModalProps> = ({
 
     const handleSave = async () => {
         if (!validate()) return;
+        setLoading(true);
         try {
             let driverPhotoUrl = driverData?.driverPhotoUrl || "";
             let licenseFrontUrl = driverData?.licenseFrontUrl || "";
@@ -180,6 +182,8 @@ const DriverModal: React.FC<DriverModalProps> = ({
             if (onSaved) onSaved();
         } catch (error) {
             console.error("❌ Error saving driver:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -469,9 +473,15 @@ const DriverModal: React.FC<DriverModalProps> = ({
                     variant="contained"
                     color="primary"
                     onClick={handleSave}
-                    sx={{ textTransform: "none" }}
+                    sx={{ textTransform: "none" }} disabled={loading}
                 >
-                    {driverData ? "Update Driver" : "Save Driver"}
+                    {loading ? (
+                        <CircularProgress size={20} sx={{ color: "white" }} />
+                    ) : driverData ? (
+                        "Update Driver"
+                    ) : (
+                        "Save Driver"
+                    )}
                 </Button>
             </DialogActions>
         </Dialog>
