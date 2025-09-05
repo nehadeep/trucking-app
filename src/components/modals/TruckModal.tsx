@@ -21,6 +21,7 @@ import {
     getDocs,
     serverTimestamp,
 } from "firebase/firestore";
+import { useTheme } from "@mui/material/styles";
 
 interface TruckModalProps {
     open: boolean;
@@ -55,7 +56,7 @@ const TruckModal: React.FC<TruckModalProps> = ({
     const [drivers, setDrivers] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<any>({});
-
+    const theme = useTheme();
     // ✅ Preload edit data or reset on open
     useEffect(() => {
         if (truckData) {

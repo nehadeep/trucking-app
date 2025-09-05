@@ -10,10 +10,11 @@ import {
     Grid,
     InputAdornment,
     Paper,
-    Divider,
+    Divider, Avatar,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import SpeedIcon from "@mui/icons-material/Speed";
+import LocalGasStationIcon from "@mui/icons-material/LocalGasStation";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import BuildIcon from "@mui/icons-material/Build";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -110,7 +111,7 @@ const Trucks: React.FC = () => {
             </Paper>
 
             {/* Truck cards */}
-            <Grid container spacing={4} sx={{ mt: 2 }}>
+            <Grid container spacing={4} sx={{ mt: 2, pl:5 }} gap={3}>
                 {filteredTrucks.map((truck) => (
                     <Grid key={truck.id} xs={12} sm={6} md={3}>
                         <Card
@@ -126,7 +127,9 @@ const Trucks: React.FC = () => {
                                 {/* Header */}
                                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
                                     <Box display="flex" alignItems="center" gap={1.5}>
-                                        <LocalShippingIcon sx={{ color: "primary.main" }} />
+                                        <Avatar sx={{ bgcolor: "#FF6B00", width: 40, height: 40 }}>
+                                            <LocalShippingIcon sx={{ color: "white" }} />
+                                        </Avatar>
                                         <Box>
                                             <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
                                                 {truck.make} {truck.model}
@@ -138,24 +141,34 @@ const Trucks: React.FC = () => {
                                     </Box>
                                     <Chip
                                         label={truck.status || "inactive"}
-                                        color={
-                                            truck.status === "active"
-                                                ? "success"
-                                                : truck.status === "maintenance"
-                                                ? "warning"
-                                                : truck.status === "on trip"
-                                                    ? "info"
-                                                    : "default"
-                                        }
                                         size="small"
-                                        sx={{ fontWeight: 500 }}
+                                        sx={{
+                                            fontWeight: 500,
+                                            textTransform: "lowercase",
+                                            bgcolor:
+                                                truck.status === "Active"
+                                                    ? "#d4f5dd" // light green background
+                                                    : truck.status === "Maintenance"
+                                                    ? "#fcefc7" // yellow-brown background
+                                                    : "#e3f2fd", // bluish background
+                                            color:
+                                                truck.status === "Active"
+                                                    ? "#2e7d32" // green text
+                                                    : truck.status === "Maintenance"
+                                                    ? "#b26a00" // brown text
+                                                    : "#1565c0", // blue text
+                                        }}
                                     />
                                 </Box>
 
                                 {/* Details */}
-                                <Typography variant="body2" sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1 }}>
-                                    <SpeedIcon fontSize="small" /> {truck.mileage?.toLocaleString()} miles
-                                </Typography>
+                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
+                                    <Typography variant="body2" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                        <SpeedIcon fontSize="small" /> {truck.mileage?.toLocaleString()} miles
+                                    </Typography>
+                                    <LocalGasStationIcon fontSize="small" color="error" />
+                                </Box>
+
                                 <Typography variant="body2" sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
                                     <ConfirmationNumberIcon fontSize="small" /> VIN: {truck.vin}
                                 </Typography>
