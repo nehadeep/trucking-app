@@ -104,6 +104,16 @@ const DriverModal: React.FC<DriverModalProps> = ({
         }
     }, [driverData, open]);
 
+    // Reset file states whenever modal closes
+    useEffect(() => {
+        if (!open) {
+            setDriverPhoto(null);
+            setLicenseFront(null);
+            setLicenseBack(null);
+            setSsnDoc(null);
+        }
+    }, [open]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         let { name, value } = e.target;
         if (name === "phone") value = formatPhoneNumber(value);
@@ -441,7 +451,9 @@ const DriverModal: React.FC<DriverModalProps> = ({
                                 border: "1px dashed #aaa",
                                 borderRadius: 2,
                                 p: 2,
-                                textAlign: "center",
+                                textAlign: "center", display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center", flexDirection: "column"
                             }}
                         >
                             <input
@@ -457,7 +469,7 @@ const DriverModal: React.FC<DriverModalProps> = ({
                                             : driverData.driverPhotoUrl
                                     }
                                     alt="Driver Preview"
-                                    style={{ width: "40%", marginTop: 8, borderRadius: 8 }}
+                                    style={{ width: "30%", marginTop: 8, borderRadius: 8 , height: 300}}
                                 />
                             )}
                         </Box>
