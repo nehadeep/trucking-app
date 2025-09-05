@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="6fb22449-834a-4b33-a53a-4727297f3d7e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/modals/DriverModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/modals/DriverModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/layouts/admin-layouts/Drivers.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/layouts/admin-layouts/Drivers.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,7 +61,8 @@
       <option name="presentableId" value="Default" />
       <updated>1756686857187</updated>
       <workItem from="1756686859113" duration="9496000" />
-      <workItem from="1756768272843" duration="42416000" />
+      <workItem from="1756768272843" duration="43296000" />
+      <workItem from="1757097319028" duration="2835000" />
     </task>
     <task id="LOCAL-00001" summary="test">
       <created>1756768623038</created>
@@ -168,7 +169,14 @@
       <option name="project" value="LOCAL" />
       <updated>1756935587530</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="added the loading indicator while adding the drivers">
+      <created>1757023447086</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1757023447086</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -191,7 +199,8 @@
     <MESSAGE value="updated the MUI version to 5 for grids" />
     <MESSAGE value="modal updated" />
     <MESSAGE value="completed the add driver part" />
-    <option name="LAST_COMMIT_MESSAGE" value="completed the add driver part" />
+    <MESSAGE value="added the loading indicator while adding the drivers" />
+    <option name="LAST_COMMIT_MESSAGE" value="added the loading indicator while adding the drivers" />
   </component>
   <component name="WindowStateProjectService">
     <state x="2374" y="336" key="#Notifications" timestamp="1756768735126">
@@ -202,11 +211,11 @@
       <screen x="1792" y="136" width="1920" height="1055" />
     </state>
     <state x="2459" y="441" key="#com.intellij.fileTypes.FileTypeChooser/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756755571523" />
-    <state x="2326" y="234" key="CommitChangelistDialog2" timestamp="1756935587045">
+    <state x="2326" y="234" key="CommitChangelistDialog2" timestamp="1757023446705">
       <screen x="1792" y="136" width="1920" height="1055" />
     </state>
     <state x="2326" y="234" key="CommitChangelistDialog2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.0.1792.1051@1792.136.1920.1055" timestamp="1756848350420" />
-    <state x="2326" y="234" key="CommitChangelistDialog2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1756935587045" />
+    <state x="2326" y="234" key="CommitChangelistDialog2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1757023446705" />
     <state x="2326" y="234" key="CommitChangelistDialog2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756929485250" />
     <state x="2326" y="228" key="CommitChangelistDialog2/1792.136.1920.986/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1095@1792.136.1920.986" timestamp="1756931861034" />
     <state x="1947" y="236" width="1591" height="779" key="DiffContextDialog" timestamp="1756869351514">
@@ -229,11 +238,11 @@
     </state>
     <state x="2242" y="270" key="SettingsEditor/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1756768555759" />
     <state x="2242" y="270" key="SettingsEditor/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756757710957" />
-    <state x="2374" y="399" key="Vcs.Push.Dialog.v2" timestamp="1756935589841">
+    <state x="2374" y="399" key="Vcs.Push.Dialog.v2" timestamp="1757023503815">
       <screen x="1792" y="136" width="1920" height="1055" />
     </state>
     <state x="2374" y="399" key="Vcs.Push.Dialog.v2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.0.1792.1051@1792.136.1920.1055" timestamp="1756848352531" />
-    <state x="2374" y="399" key="Vcs.Push.Dialog.v2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1756935589841" />
+    <state x="2374" y="399" key="Vcs.Push.Dialog.v2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1757023503815" />
     <state x="2374" y="399" key="Vcs.Push.Dialog.v2/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756929487034" />
     <state x="2374" y="382" key="Vcs.Push.Dialog.v2/1792.136.1920.986/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1095@1792.136.1920.986" timestamp="1756931863182" />
     <state x="2407" y="291" key="run.anything.popup" timestamp="1756846299819">
