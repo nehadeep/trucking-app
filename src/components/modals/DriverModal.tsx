@@ -488,7 +488,7 @@ const DriverModal: React.FC<DriverModalProps> = ({
                     sx={{ textTransform: "none" }} disabled={loading}
                 >
                     {loading ? (
-                        <CircularProgress size={20} sx={{ color: "white" }} />
+                        <CircularProgress size={20} sx={{ color: theme.palette.primary.main }}/>
                     ) : driverData ? (
                         "Update Driver"
                     ) : (
