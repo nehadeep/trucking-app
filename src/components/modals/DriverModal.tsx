@@ -27,6 +27,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
 import PersonIcon from "@mui/icons-material/Person";
+import {isFutureOrToday} from "../../utils/dateValidators";
 
 
 interface DriverModalProps {
@@ -136,6 +137,9 @@ const DriverModal: React.FC<DriverModalProps> = ({
                 "License number must be uppercase alphanumeric";
         if (!form.licenseExpiry) {
             newErrors.licenseExpiry = "License expiry date is required";
+        }
+        if (form.licenseExpiry && !isFutureOrToday(form.licenseExpiry)) {
+            newErrors.insuranceExpiry = "License expiry must be in a future date";
         }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
