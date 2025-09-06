@@ -22,6 +22,7 @@ import {
     serverTimestamp,
 } from "firebase/firestore";
 import { useTheme } from "@mui/material/styles";
+import { isPastOrToday, isFutureOrToday } from "../../utils/dateValidators";
 
 interface TruckModalProps {
     open: boolean;
@@ -109,6 +110,13 @@ const TruckModal: React.FC<TruckModalProps> = ({
         if (!form.plateNumber.trim())
             newErrors.plateNumber = "Plate number is required";
 
+        if (form.lastService && !isPastOrToday(form.lastService)) {
+            newErrors.lastService = "Last maintenance must be today or a past date";
+        }
+        if (form.insuranceExpiry && !isFutureOrToday(form.insuranceExpiry)) {
+            newErrors.insuranceExpiry = "Insurance expiry must be today or a future date";
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -167,7 +175,7 @@ const TruckModal: React.FC<TruckModalProps> = ({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    bgcolor: "linear-gradient(90deg, #FF6B00, #FF8533)",
+                    background: "linear-gradient(90deg, #FF6B00, #FF8533)",
                     color: "white",
                     fontWeight: 600,
                 }}
@@ -304,6 +312,8 @@ const TruckModal: React.FC<TruckModalProps> = ({
                             onChange={handleChange}
                             fullWidth
                             InputLabelProps={{ shrink: true }}
+                            error={!!errors.lastService}
+                            helperText={errors.lastService}
                         />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -315,6 +325,8 @@ const TruckModal: React.FC<TruckModalProps> = ({
                             onChange={handleChange}
                             fullWidth
                             InputLabelProps={{ shrink: true }}
+                            error={!!errors.insuranceExpiry}
+                            helperText={errors.insuranceExpiry}
                         />
                     </Grid>
 
