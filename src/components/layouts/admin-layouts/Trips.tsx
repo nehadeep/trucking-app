@@ -15,13 +15,15 @@ import {
     Tabs,
     Tab,
     LinearProgress,
+    Avatar,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import Inventory2Icon from "@mui/icons-material/Inventory2"; // trailer
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import RouteIcon from "@mui/icons-material/AltRoute";
 import EditIcon from "@mui/icons-material/Edit";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db, auth } from "../../../firebaseConfig";
 import TripModal from "../../modals/TripModal";
 import { formatDate } from "../../../utils/dateFormatter";
@@ -33,8 +35,62 @@ const Trips: React.FC = () => {
     const [editTrip, setEditTrip] = useState<any | null>(null);
     const [tab, setTab] = useState("in progress");
 
+    // ✅ Odometer editing states
+    const [editingTripId, setEditingTripId] = useState<string | null>(null);
+    const [endMilesDraft, setEndMilesDraft] = useState<string>("");
+
     const adminId = auth.currentUser?.uid;
 
+    // ---------- Odometer Functions ----------
+    const handleStartEditing = (trip: any) => {
+        setEditingTripId(trip.id);
+        setEndMilesDraft(trip.endingMiles || "");
+    };
+
+    const handleCancelEditing = () => {
+        setEditingTripId(null);
+        setEndMilesDraft("");
+    };
+
+    const handleSaveOdometer = async (trip: any) => {
+        try {
+            const startMiles = Number(trip.startingMiles || 0);
+            const endMiles = Number(endMilesDraft || 0);
+
+            if (isNaN(endMiles) || endMiles < startMiles) {
+                alert("❌ End odometer must be greater than start odometer.");
+                return;
+            }
+
+            const totalMiles = endMiles - startMiles;
+
+            // ✅ Update Firestore
+            await updateDoc(doc(db, "admins", adminId!, "trips", trip.id), {
+                endingMiles: endMiles,
+                totalTripDrivenMiles: totalMiles,
+                updatedAt: serverTimestamp(),
+            });
+
+            // ✅ Update local state
+            setTrips((prev) =>
+                prev.map((t) =>
+                    t.id === trip.id
+                        ? { ...t, endingMiles: endMiles, totalTripDrivenMiles: totalMiles }
+                        : t
+                )
+            );
+
+            setEditingTripId(null);
+            setEndMilesDraft("");
+
+            alert(`✅ End odometer updated. Final trip miles: ${totalMiles}`);
+        } catch (error) {
+            console.error("❌ Error updating odometer:", error);
+            alert("Failed to update odometer. Please try again.");
+        }
+    };
+
+    // ---------- Trips Fetch ----------
     const fetchTrips = async () => {
         if (!adminId) return;
         const snapshot = await getDocs(collection(db, "admins", adminId, "trips"));
@@ -48,7 +104,7 @@ const Trips: React.FC = () => {
 
     const filteredTrips = trips.filter(
         (t) =>
-            (t.status?.toLowerCase() === tab) &&
+            t.status?.toLowerCase() === tab &&
             (t.tripNumber?.toLowerCase().includes(search.toLowerCase()) ||
                 t.driver?.toLowerCase().includes(search.toLowerCase()) ||
                 t.route?.toLowerCase().includes(search.toLowerCase()))
@@ -75,7 +131,7 @@ const Trips: React.FC = () => {
                         px: 3,
                         py: 1,
                         fontWeight: 600,
-                        bgcolor: "#2e7d32", // greenish button
+                        bgcolor: "#2e7d32",
                         "&:hover": { bgcolor: "#256628" },
                     }}
                     onClick={() => {
@@ -89,14 +145,7 @@ const Trips: React.FC = () => {
             </Box>
 
             {/* Search Bar */}
-            <Paper
-                elevation={1}
-                sx={{
-                    p: 2.5,
-                    borderRadius: "12px",
-                    mb: 3,
-                }}
-            >
+            <Paper elevation={1} sx={{ p: 2.5, borderRadius: "12px", mb: 3 }}>
                 <TextField
                     placeholder="Search by trip #, driver name, or route..."
                     value={search}
@@ -130,7 +179,9 @@ const Trips: React.FC = () => {
             {/* Trip cards */}
             <Grid container spacing={4} sx={{ mt: 2 }}>
                 {filteredTrips.map((trip) => {
-                    const milesDriven = Number(trip.milesDriven || 0);
+                    const startMiles = Number(trip.startingMiles || 0);
+                    const endMiles = Number(trip.endingMiles || 0);
+                    const milesDriven = Number(trip.totalTripDrivenMiles || 0);
                     const plannedMiles = Number(trip.plannedMiles || 0);
                     const progress = plannedMiles > 0 ? (milesDriven / plannedMiles) * 100 : 0;
 
@@ -182,6 +233,20 @@ const Trips: React.FC = () => {
                                         />
                                     </Box>
 
+                                    {/* Route Info */}
+                                    {trip.route_details && (
+                                        <Box sx={{ mt: 1, p: 1.5, bgcolor: "#F5F9FF", borderRadius: 2 }}>
+                                            <Typography
+                                                variant="body2"
+                                                sx={{ display: "flex", alignItems: "center", gap: 1, fontWeight: 600 }}
+                                            >
+                                                <RouteIcon fontSize="small" color="primary" /> Route:{" "}
+                                                {trip.route_details.pickup.city}, {trip.route_details.pickup.state} →{" "}
+                                                {trip.route_details.dropoff.city}, {trip.route_details.dropoff.state}
+                                            </Typography>
+                                        </Box>
+                                    )}
+
                                     {/* Progress */}
                                     <Box sx={{ mt: 1, mb: 1 }}>
                                         <LinearProgress variant="determinate" value={progress} />
@@ -191,25 +256,105 @@ const Trips: React.FC = () => {
                                     </Box>
 
                                     {/* Driver / Truck / Trailer */}
-                                    <Typography variant="body2" sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
-                                        <DirectionsCarIcon fontSize="small" /> Driver: {trip.driver || "Not Assigned"}
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
-                                        <LocalShippingIcon fontSize="small" /> Truck: {trip.truck || "Not Assigned"}
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1 }}>
-                                        <Inventory2Icon fontSize="small" /> Trailer: {trip.trailer || "Not Assigned"}
-                                    </Typography>
+                                    <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1.5 }}>
+                                        <Avatar sx={{ bgcolor: "#1565c0", width: 28, height: 28 }}>
+                                            <DirectionsCarIcon fontSize="small" />
+                                        </Avatar>
+                                        <Typography variant="body2">Driver: {trip.driver || "Not Assigned"}</Typography>
+                                    </Box>
+                                    <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1.5 }}>
+                                        <Avatar sx={{ bgcolor: "#FF6B00", width: 28, height: 28 }}>
+                                            <LocalShippingIcon fontSize="small" />
+                                        </Avatar>
+                                        <Typography variant="body2">Truck: {trip.truck || "Not Assigned"}</Typography>
+                                    </Box>
+                                    <Box sx={{ mt: 1, display: "flex", alignItems: "center", gap: 1.5 }}>
+                                        <Avatar sx={{ bgcolor: "#9C27B0", width: 28, height: 28 }}>
+                                            <Inventory2Icon fontSize="small" />
+                                        </Avatar>
+                                        <Typography variant="body2">Trailer: {trip.trailer || "Not Assigned"}</Typography>
+                                    </Box>
+
+                                    {/* Odometer Readings */}
+                                    <Card
+                                        variant="outlined"
+                                        sx={{
+                                            mt: 2,
+                                            p: 2,
+                                            borderRadius: 2,
+                                            backgroundColor: "#f0fdf4",
+                                            border: "1px solid #bbf7d0",
+                                        }}
+                                    >
+                                        <Typography variant="subtitle1" fontWeight={600} mb={1}>
+                                            Odometer Readings
+                                        </Typography>
+
+                                        <Grid container spacing={2}>
+                                            {/* Start Odometer */}
+                                            <Grid item xs={4}>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Start Odometer
+                                                </Typography>
+                                                <Typography fontWeight={600}>
+                                                    {trip.startingMiles ? trip.startingMiles : "Not set"}
+                                                </Typography>
+                                            </Grid>
+
+                                            {/* End Odometer (inline editable) */}
+                                            <Grid item xs={4}>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    End Odometer
+                                                </Typography>
+
+                                                {editingTripId === trip.id ? (
+                                                    <Box display="flex" alignItems="center" gap={1}>
+                                                        <TextField
+                                                            size="small"
+                                                            type="number"
+                                                            value={endMilesDraft}
+                                                            onChange={(e) => setEndMilesDraft(e.target.value)}
+                                                        />
+                                                        <Button
+                                                            size="small"
+                                                            color="success"
+                                                            onClick={() => handleSaveOdometer(trip)}
+                                                        >
+                                                            ✓
+                                                        </Button>
+                                                        <Button size="small" color="error" onClick={handleCancelEditing}>
+                                                            ✕
+                                                        </Button>
+                                                    </Box>
+                                                ) : (
+                                                    <Box display="flex" alignItems="center" gap={1}>
+                                                        <Typography fontWeight={600}>
+                                                            {trip.endingMiles ? trip.endingMiles : "Not set"}
+                                                        </Typography>
+                                                        <Button size="small" onClick={() => handleStartEditing(trip)}>
+                                                            ✎
+                                                        </Button>
+                                                    </Box>
+                                                )}
+                                            </Grid>
+
+                                            {/* Trip Miles */}
+                                            <Grid item xs={4}>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Trip Miles
+                                                </Typography>
+                                                <Typography fontWeight={600} color="success.main">
+                                                    {trip.totalTripDrivenMiles ? `${trip.totalTripDrivenMiles} mi` : "0 mi"}
+                                                </Typography>
+                                            </Grid>
+                                        </Grid>
+                                    </Card>
 
                                     {/* Revenue */}
                                     {trip.totalRevenue && (
                                         <Typography
                                             variant="body2"
-                                            sx={{
-                                                mt: 1,
-                                                fontWeight: 600,
-                                                color: "#2e7d32",
-                                            }}
+                                            sx={{ mt: 1, fontWeight: 600, color: "#2e7d32" }}
                                         >
                                             Total Revenue: ${Number(trip.totalRevenue).toLocaleString()}
                                         </Typography>
