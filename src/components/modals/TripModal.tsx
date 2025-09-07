@@ -625,7 +625,7 @@ const TripModal: React.FC<TripModalProps> = ({
                     </Grid>
 
                     <Grid item xs={12} sm={3}><TextField label="Fuel Cost ($)" name="fuelCost" value={form.fuelCost} onChange={handleChange} fullWidth /></Grid>
-                    <Grid item xs={12} sm={3}><TextField label="Driver Payment ($)" name="driverPayment" value={form.driverPayment} onChange={handleChange} fullWidth /></Grid>
+                    <Grid item xs={12} sm={3}><TextField label="Driver Payment ($)" name="driverPayment" value={form.driverPayment} onChange={handleChange} fullWidth disabled/></Grid>
                     <Grid item xs={12} sm={3}><TextField label="Total Revenue ($)" name="totalRevenue" value={form.totalRevenue} onChange={handleChange} fullWidth /></Grid>
                     <Grid item xs={12} sm={3}><TextField label="Other Expenses ($)" name="otherExpenses" value={form.otherExpenses} onChange={handleChange} fullWidth /></Grid>
 
