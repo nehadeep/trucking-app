@@ -55,6 +55,7 @@ const DriverModal: React.FC<DriverModalProps> = ({
         licenseNumber: "",
         licenseExpiry: "",
         hireDate: "",
+        payPerMile: "",
         totalMiles: "",
         status: "Active",
         ssn: "",
@@ -78,6 +79,7 @@ const DriverModal: React.FC<DriverModalProps> = ({
                 licenseNumber: driverData.licenseNumber || "",
                 licenseExpiry: driverData.licenseExpiry || "",
                 hireDate: driverData.hireDate || "",
+                payPerMile: driverData.payPerMile || "",
                 totalMiles: driverData.totalMiles || "",
                 status: driverData.status || "Active",
                 ssn: driverData.ssn || "",
@@ -92,6 +94,7 @@ const DriverModal: React.FC<DriverModalProps> = ({
                 licenseNumber: "",
                 licenseExpiry: "",
                 hireDate: "",
+                payPerMile: "",
                 totalMiles: "",
                 status: "Active",
                 ssn: "",
@@ -130,6 +133,8 @@ const DriverModal: React.FC<DriverModalProps> = ({
             newErrors.phone = "Valid phone number is required";
         if (!form.email || !isValidEmail(form.email))
             newErrors.email = "Enter a valid email";
+        if (!form.payPerMile)
+            newErrors.payPerMile = "Driver pay per mile is required";
         if (!form.ssn || !isValidSSN(form.ssn))
             newErrors.ssn = "Enter SSN as ###-##-####";
         if (!form.licenseNumber || !isValidLicenseNumber(form.licenseNumber))
@@ -276,7 +281,7 @@ const DriverModal: React.FC<DriverModalProps> = ({
                     </Grid>
 
                     {/* Row 4 */}
-                    <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={6}>
                         <TextField
                             select
                             label="Status"
@@ -290,7 +295,7 @@ const DriverModal: React.FC<DriverModalProps> = ({
                             <MenuItem value="Inactive">Inactive</MenuItem>
                         </TextField>
                     </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={6}>
                         <TextField
                             label="Hire Date"
                             name="hireDate"
@@ -301,7 +306,22 @@ const DriverModal: React.FC<DriverModalProps> = ({
                             InputLabelProps={{ shrink: true }}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            label="Driver Pay / Per Mile *"
+                            name="payPerMile"
+                            type="number"
+                            value={form.payPerMile}
+                            onChange={handleChange}
+                            fullWidth
+                            required
+                            error={!form.payPerMile}
+                            helperText={!form.payPerMile}
+                        />
+                    </Grid>
+
+
+                    <Grid item xs={12} sm={6}>
                         <TextField
                             label="Total Miles"
                             name="totalMiles"

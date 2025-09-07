@@ -51,11 +51,12 @@ interface RouteDetails {
     };
 }
 
+
 interface TripForm {
     tripNumber: string;
     status: string;
     route: string;
-    driver: string;
+    driver: string; // stores licenseNumber
     truck: string;
     trailer: string;
     startDate: string;
@@ -64,13 +65,12 @@ interface TripForm {
     endingMiles: string;
     totalTripDrivenMiles: string;
     fuelCost: string;
-    driverPayment: string;
+    driverPayment: string; // auto-loaded pay per mile
     totalRevenue: string;
     otherExpenses: string;
     notes: string;
     route_details: RouteDetails;
 }
-
 const TripModal: React.FC<TripModalProps> = ({
                                                  open,
                                                  onClose,
@@ -267,12 +267,13 @@ const TripModal: React.FC<TripModalProps> = ({
         return await getDownloadURL(fileRef);
     };
 
-    const handleDriverSelect = (driverId: string) => { //driverID is the license number of driver
-        const selectedDriver = drivers.find((d) => d.id === driverId);
+    const handleDriverSelect = (driverName: string) => { //driverID is the license number of driver
+        const selectedDriver = drivers.find((d) => d.fullName === driverName);
 
         setForm((prev) => ({
             ...prev,
-            driver: driverId, // store driver ID
+            driver: driverName,
+            driverPayment: selectedDriver.payPerMile?.toString() || "",
             truck: "",
             trailer: "",
         }));
@@ -301,7 +302,7 @@ const TripModal: React.FC<TripModalProps> = ({
             if (assignedTrailer) {
                 setForm((prev) => ({
                     ...prev,
-                    trailer: assignedTrailer
+                    trailer: assignedTrailer.trailerNumber
                 }));
             }
         }
@@ -538,7 +539,7 @@ const TripModal: React.FC<TripModalProps> = ({
                         >
                             <MenuItem value="">-- Select Driver --</MenuItem>
                             {drivers.map((d) => (
-                                <MenuItem key={d.id} value={d.licenseNumber}>
+                                <MenuItem key={d.id} value={d.fullName}>
                                     {d.fullName}
                                 </MenuItem>
                             ))}
