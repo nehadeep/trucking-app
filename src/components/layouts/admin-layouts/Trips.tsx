@@ -27,6 +27,9 @@ import { collection, getDocs, doc, updateDoc, serverTimestamp } from "firebase/f
 import { db, auth } from "../../../firebaseConfig";
 import TripModal from "../../modals/TripModal";
 import { formatDate } from "../../../utils/dateFormatter";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+
 
 const Trips: React.FC = () => {
     const [openAdd, setOpenAdd] = useState(false);
@@ -308,32 +311,29 @@ const Trips: React.FC = () => {
                                                 </Typography>
 
                                                 {editingTripId === trip.id ? (
-                                                    <Box display="flex" alignItems="center" gap={1}>
+                                                    <Box display="flex" alignItems="center" gap={1} sx={{ width: "100%" }}>
                                                         <TextField
                                                             size="small"
                                                             type="number"
                                                             value={endMilesDraft}
                                                             onChange={(e) => setEndMilesDraft(e.target.value)}
+                                                            fullWidth
                                                         />
-                                                        <Button
-                                                            size="small"
-                                                            color="success"
-                                                            onClick={() => handleSaveOdometer(trip)}
-                                                        >
-                                                            ✓
-                                                        </Button>
-                                                        <Button size="small" color="error" onClick={handleCancelEditing}>
-                                                            ✕
-                                                        </Button>
+                                                      <CheckIcon  color="success" fontSize="small" onClick={() => handleSaveOdometer(trip)} />
+
+                                                        <CloseIcon fontSize="small" color="error" onClick={handleCancelEditing} />
+
                                                     </Box>
                                                 ) : (
-                                                    <Box display="flex" alignItems="center" gap={1}>
+                                                    <Box display="flex" alignItems="center" justifyContent="flex-start" gap={0.5}>
                                                         <Typography fontWeight={600}>
                                                             {trip.endingMiles ? trip.endingMiles : "Not set"}
                                                         </Typography>
-                                                        <Button size="small" onClick={() => handleStartEditing(trip)}>
-                                                            ✎
-                                                        </Button>
+
+                                                        {trip.status?.toLowerCase() === "completed" && (
+                                                            <EditIcon fontSize="small" color="primary" sx={{ cursor: "pointer" }}
+                                                                      onClick={() => handleStartEditing(trip)} />
+                                                        )}
                                                     </Box>
                                                 )}
                                             </Grid>

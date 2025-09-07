@@ -267,36 +267,41 @@ const TripModal: React.FC<TripModalProps> = ({
         return await getDownloadURL(fileRef);
     };
 
-    const handleDriverSelect = (driverName: string) => {
-        // ✅ Set the driver
+    const handleDriverSelect = (driverId: string) => { //driverID is the license number of driver
+        const selectedDriver = drivers.find((d) => d.id === driverId);
+
         setForm((prev) => ({
             ...prev,
-            driver: driverName,
+            driver: driverId, // store driver ID
             truck: "",
             trailer: "",
         }));
 
-        // ✅ Find truck assigned to this driver
-        const assignedTruck = trucks.find((t) => t.assignedDriver === driverName);
+        if (!selectedDriver) return;
+
+        // ✅ Find truck assigned to this driver (by licenseNumber)
+        const assignedTruck = trucks.find(
+            (t) => t.assignedDriverId === selectedDriver.licenseNumber
+        );
 
         if (assignedTruck) {
             const truckName = `${assignedTruck.make} ${assignedTruck.model}`;
 
-            // Set truck in form
+            // Save truck info
             setForm((prev) => ({
                 ...prev,
                 truck: truckName,
             }));
 
-            // ✅ Find trailer assigned to this truck
+            // ✅ Find trailer assigned to this truck (by truckNumber)
             const assignedTrailer = trailers.find(
-                (tr) => tr.assignedTruck === truckName
+                (tr) => tr.assignedTruckNumber === assignedTruck.truckNumber
             );
 
             if (assignedTrailer) {
                 setForm((prev) => ({
                     ...prev,
-                    trailer: assignedTrailer.trailerNumber,
+                    trailer: assignedTrailer
                 }));
             }
         }
@@ -533,7 +538,7 @@ const TripModal: React.FC<TripModalProps> = ({
                         >
                             <MenuItem value="">-- Select Driver --</MenuItem>
                             {drivers.map((d) => (
-                                <MenuItem key={d.id} value={d.fullName}>
+                                <MenuItem key={d.id} value={d.licenseNumber}>
                                     {d.fullName}
                                 </MenuItem>
                             ))}

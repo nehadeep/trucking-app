@@ -56,6 +56,7 @@ const TrailerModal: React.FC<TrailerModalProps> = ({
         lastInspection: "",
         insuranceExpiry: "",
         assignedTruck: "",
+        assignedTruckNumber :""
     });
 
     const [errors, setErrors] = useState<any>({});
@@ -84,6 +85,7 @@ const TrailerModal: React.FC<TrailerModalProps> = ({
                 lastInspection: "",
                 insuranceExpiry: "",
                 assignedTruck: "",
+                assignedTruckNumber : ""
             });
         }
     }, [trailerData, open]);
@@ -127,7 +129,18 @@ const TrailerModal: React.FC<TrailerModalProps> = ({
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setForm({ ...form, [name]: value });
+        if (name === "assignedTruck") {
+            // value is encoded as "TruckName|TruckNumber"
+            const [truckName, truckNumber] = value.split("|");
+
+            setForm((prev: any) => ({
+                ...prev,
+                assignedTruck: truckName,
+                assignedTruckNumber: truckNumber, // 👈 save truck number too
+            }));
+        } else {
+            setForm((prev: any) => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSave = async () => {
@@ -315,14 +328,14 @@ const TrailerModal: React.FC<TrailerModalProps> = ({
                             select
                             label="Assigned Truck"
                             name="assignedTruck"
-                            value={form.assignedTruck}
+                            value={form.assignedTruck || ""}
                             onChange={handleChange}
                             fullWidth
                         >
                             <MenuItem value="">-- Select Truck --</MenuItem>
                             {trucks.map((t) => (
-                                <MenuItem key={t.id} value={t.make + " " + t.model}>
-                                    {t.make} {t.model} ({t.plateNumber})
+                                <MenuItem key={t.id} value={`${t.make} ${t.model}|${t.truckNumber}`}>
+                                    {t.make} {t.model} ({t.truckNumber})
                                 </MenuItem>
                             ))}
                         </TextField>

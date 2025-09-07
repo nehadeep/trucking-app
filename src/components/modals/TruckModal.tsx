@@ -43,6 +43,7 @@ const TruckModal: React.FC<TruckModalProps> = ({
         make: "",
         model: "",
         year: "",
+        truckNumber:"",
         plateNumber: "",
         vin: "",
         color: "",
@@ -52,6 +53,7 @@ const TruckModal: React.FC<TruckModalProps> = ({
         lastService: "",
         insuranceExpiry: "",
         assignedDriver: "",
+        assignedDriverId: ""
     });
 
     const [drivers, setDrivers] = useState<any[]>([]);
@@ -65,6 +67,7 @@ const TruckModal: React.FC<TruckModalProps> = ({
                 make: truckData.make || "",
                 model: truckData.model || "",
                 year: truckData.year || "",
+                truckNumber : truckData.truckNumber || "",
                 plateNumber: truckData.plateNumber || "",
                 vin: truckData.vin || "",
                 color: truckData.color || "",
@@ -74,12 +77,14 @@ const TruckModal: React.FC<TruckModalProps> = ({
                 lastService: truckData.lastService || "",
                 insuranceExpiry: truckData.insuranceExpiry || "",
                 assignedDriver: truckData.assignedDriver || "",
+                assignedDriverId: truckData.assignedDriverId || ""
             });
         } else if (open) {
             setForm({
                 make: "",
                 model: "",
                 year: "",
+                truckNumber : "",
                 plateNumber: "",
                 vin: "",
                 color: "",
@@ -89,6 +94,7 @@ const TruckModal: React.FC<TruckModalProps> = ({
                 lastService: "",
                 insuranceExpiry: "",
                 assignedDriver: "",
+                assignedDriverId : ""
             });
             setErrors({});
         }
@@ -106,6 +112,8 @@ const TruckModal: React.FC<TruckModalProps> = ({
         } else if (!/^\d{4}$/.test(form.year)) {
             newErrors.year = "Year must be a 4-digit number";
         }
+        if (!form.truckNumber.trim())
+            newErrors.truckNumber = "Truck number is required";
 
         if (!form.plateNumber.trim())
             newErrors.plateNumber = "Plate number is required";
@@ -140,7 +148,16 @@ const TruckModal: React.FC<TruckModalProps> = ({
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setForm({ ...form, [name]: value });
+        if (name === "assignedDriver") {
+            const [fullName, licenseNumber] = value.split("|");
+            setForm((prev: any) => ({
+                ...prev,
+                assignedDriver: fullName,
+                assignedDriverId: licenseNumber,
+            }));
+        } else {
+            setForm((prev: any) => ({ ...prev, [name]: value }));
+        }
     };
 
 
@@ -229,7 +246,19 @@ const TruckModal: React.FC<TruckModalProps> = ({
                     </Grid>
 
                     {/* Row 2 */}
-                    <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={3}>
+                        <TextField
+                            label="Truck Number *"
+                            name="truckNumber"
+                            value={form.truckNumber}
+                            onChange={handleChange}
+                            fullWidth
+                            error={!!errors.truckNumber}
+                            helperText={errors.truckNumber}
+                        />
+                    </Grid>
+
+                    <Grid item xs={12} sm={3}>
                         <TextField
                             label="Plate Number *"
                             name="plateNumber"
@@ -240,7 +269,7 @@ const TruckModal: React.FC<TruckModalProps> = ({
                             helperText={errors.plateNumber}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={3}>
                         <TextField
                             label="VIN"
                             name="vin"
@@ -252,7 +281,7 @@ const TruckModal: React.FC<TruckModalProps> = ({
                     </Grid>
 
                     {/* New Color Field */}
-                    <Grid item xs={12} sm={4}>
+                    <Grid item xs={12} sm={3}>
                         <TextField
                             label="Color"
                             name="color"
@@ -343,7 +372,7 @@ const TruckModal: React.FC<TruckModalProps> = ({
                             <MenuItem value="">-- None --</MenuItem>
                             {drivers.map((d) => (
                                 <MenuItem key={d.id}
-                                          value={d.fullName}
+                                          value={`${d.fullName}|${d.licenseNumber}`}
                                 >
                                     {d.fullName} ({d.licenseNumber})
                                 </MenuItem>
