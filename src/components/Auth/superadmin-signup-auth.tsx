@@ -9,7 +9,11 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useSnackbar } from "notistack";
 import {createUserWithEmailAndPassword, RecaptchaVerifier, signInWithPhoneNumber} from "firebase/auth";
 import { auth, db } from "../../firebaseConfig";
-import {doc, getDoc, setDoc} from "firebase/firestore";
+import {doc, getDoc, setDoc,serverTimestamp} from "firebase/firestore";
+import {
+    formatPhoneNumber,
+    isValidEmail,
+} from "../../utils/validators";
 
 const SuperadminSignupAuth: React.FC = () => {
     const navigate = useNavigate();
@@ -23,30 +27,26 @@ const SuperadminSignupAuth: React.FC = () => {
     const [otp, setOtp] = useState("");
     const [confirmationResult, setConfirmationResult] = useState<any>(null);
 
+    const [rawPhone, setRawPhone] = useState(""); // firebase authenticate only with +! and rest number without dash spaces etc
+
+    const [disabledOTP, setDisabledOTP] = useState(true);
 
     const validateEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
     const validatePassword = (p: string) => p.length >= 6;
     // Step 1: Send OTP
     const sendOtp = async () => {
         try {
-            // 🔍 Check if phone exists in Firestore (e.g., in "drivers" collection)
-            const driverRef = doc(db, "drivers", phone);
-            const driverSnap = await getDoc(driverRef);
-
-            if (!driverSnap.exists()) {
-                enqueueSnackbar("This phone number is not registered ❌", {variant: "error"});
-                return; // stop here, don't send OTP
-            }
-
             setupRecaptcha();
 
             const appVerifier = (window as any).recaptchaVerifier;
-            const result = await signInWithPhoneNumber(auth, phone, appVerifier);
+            const result = await signInWithPhoneNumber(auth, rawPhone, appVerifier);
             setConfirmationResult(result);
-            enqueueSnackbar("OTP sent to phone ✅", {variant: "success"});
+
+            enqueueSnackbar("✅ OTP sent to phone", { variant: "success" });
+            setDisabledOTP(false);
         } catch (error) {
             console.error(error);
-            enqueueSnackbar("Failed to send OTP ❌", {variant: "error"});
+            enqueueSnackbar("❌ Failed to send OTP", { variant: "error" });
         }
     };
 
@@ -67,9 +67,41 @@ const SuperadminSignupAuth: React.FC = () => {
     // Step 2: Verify OTP
     const verifyOtp = async () => {
         try {
+            if (!confirmationResult) {
+                enqueueSnackbar("❌ Please request OTP first", { variant: "error" });
+                return;
+            }
+
             if (confirmationResult) {
-                await confirmationResult.confirm(otp);
-                enqueueSnackbar("Phone verified & user logged in ✅", { variant: "success" });
+                const result = await confirmationResult.confirm(otp);
+                const user = result.user;
+                const superAdminRef = doc(db, "superadmin", rawPhone);
+                const superAdminSnap = await getDoc(superAdminRef);
+
+                if (superAdminSnap.exists()) {
+                    // ✅ Already registered → login
+                    await setDoc(
+                        superAdminRef,
+                        {
+                            lastLogin: serverTimestamp(),
+                        },
+                        { merge: true }
+                    );
+                    enqueueSnackbar("✅ Superadmin logged in", { variant: "success" });
+                    navigate("/console/superadmin"); // 🔹 redirect to dashboard
+                } else {
+                    // 🆕 Not registered → signup
+                    await setDoc(superAdminRef, {
+                        uid: user.uid,
+                        phone,
+                        role: "superadmin",
+                        companyName: "Drive Sphere",
+                        createdAt: serverTimestamp(),
+                    });
+                    enqueueSnackbar("🎉 Superadmin account created", { variant: "success" });
+                    navigate("/console/superadmin"); // 🔹 redirect to dashboard
+                }
+
             }
         } catch (error:any) {
             console.error(error);
@@ -91,6 +123,18 @@ const SuperadminSignupAuth: React.FC = () => {
     const handleAlreadyHaveAccountClick = () => {
         localStorage.setItem("fromSuperadminLogin", "true");
         navigate("/");
+    };
+
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let raw = e.target.value.replace(/\D/g, ""); // keep only digits
+
+        // Limit to 10 digits max (US number length)
+        if (raw.length > 10) {
+            raw = raw.slice(0, 10);
+        }
+
+        setPhone(formatPhoneNumber(raw)); // UI formatted version
+        setRawPhone(`+1${raw}`); // keep raw value for Firebase login
     };
 
     const handleSignup = async () => {
@@ -193,7 +237,7 @@ const SuperadminSignupAuth: React.FC = () => {
                                 placeholder="+1 555 555 5555"
                                 margin="normal"
                                 value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
+                                onChange={handlePhoneChange}
                             />
                             <Button fullWidth variant="outlined" onClick={sendOtp}>
                                 Send OTP
@@ -203,7 +247,7 @@ const SuperadminSignupAuth: React.FC = () => {
                                 label="OTP"
                                 placeholder="Enter OTP"
                                 margin="normal"
-                                value={otp}
+                                value={otp} disabled={disabledOTP}
                                 onChange={(e) => setOtp(e.target.value)}
                             />
                             <Button fullWidth variant="contained" sx={{ mt: 1 }} onClick={verifyOtp}>

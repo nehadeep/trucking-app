@@ -14,8 +14,6 @@ import { addDoc, collection, doc, serverTimestamp, setDoc } from "firebase/fires
 import {
     formatPhoneNumber,
     isValidEmail,
-    isValidLicenseNumber,
-    isValidSSN, formatSSN
 } from "../../utils/validators";
 
 const CONTACT_PHONE = "+1-555-123-4567";

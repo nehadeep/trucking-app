@@ -3,8 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="6fb22449-834a-4b33-a53a-4727297f3d7e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Auth.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Auth.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Auth/admin-signup-auth.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Auth/admin-signup-auth.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Auth/superadmin-signup-auth.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Auth/superadmin-signup-auth.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +63,7 @@
       <updated>1756686857187</updated>
       <workItem from="1756686859113" duration="9496000" />
       <workItem from="1756768272843" duration="43296000" />
-      <workItem from="1757097319028" duration="46109000" />
+      <workItem from="1757097319028" duration="50823000" />
     </task>
     <task id="LOCAL-00001" summary="test">
       <created>1756768623038</created>
@@ -261,14 +261,20 @@
       <option name="project" value="LOCAL" />
       <updated>1757274296966</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="Added the 3 different logins for superadmin, admin and drivers">
+      <created>1757368169519</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1757368169519</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added the common &quot;console&quot; playground for admin and superadmins" />
     <MESSAGE value="set up the header, footer and left navigation withiing the console" />
     <MESSAGE value="added the invitation page" />
     <MESSAGE value="added the firebase node mailer" />
@@ -293,7 +299,8 @@
     <MESSAGE value="Added the appropirate Ids comparison to link all drivers, trucks and trailer and their trips" />
     <MESSAGE value="corrected some id and name" />
     <MESSAGE value="driver payment automation added" />
-    <option name="LAST_COMMIT_MESSAGE" value="driver payment automation added" />
+    <MESSAGE value="Added the 3 different logins for superadmin, admin and drivers" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added the 3 different logins for superadmin, admin and drivers" />
   </component>
   <component name="WindowStateProjectService">
     <state x="2374" y="336" key="#Notifications" timestamp="1756768735126">
@@ -304,10 +311,10 @@
       <screen x="1792" y="136" width="1920" height="1055" />
     </state>
     <state x="2459" y="441" key="#com.intellij.fileTypes.FileTypeChooser/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756755571523" />
-    <state x="498" y="104" key="CommitChangelistDialog2" timestamp="1757274296647">
-      <screen x="0" y="0" width="1792" height="1120" />
+    <state x="498" y="98" key="CommitChangelistDialog2" timestamp="1757368169193">
+      <screen x="0" y="0" width="1792" height="1051" />
     </state>
-    <state x="498" y="98" key="CommitChangelistDialog2/-1920.25.1920.1055/0.-1055.1920.1055/1792.136.1920.1055/0.0.1792.1051@0.0.1792.1051" timestamp="1757205277351" />
+    <state x="498" y="98" key="CommitChangelistDialog2/-1920.25.1920.1055/0.-1055.1920.1055/1792.136.1920.1055/0.0.1792.1051@0.0.1792.1051" timestamp="1757368169193" />
     <state x="2326" y="234" key="CommitChangelistDialog2/-1920.25.1920.1055/0.-1055.1920.1055/1792.136.1920.1055/0.0.1792.1051@1792.136.1920.1055" timestamp="1757118350965" />
     <state x="498" y="104" key="CommitChangelistDialog2/-1920.25.1920.1055/0.-1055.1920.1055/1792.136.1920.1055/0.0.1792.1120@0.0.1792.1120" timestamp="1757194126240" />
     <state x="2326" y="234" key="CommitChangelistDialog2/-1920.25.1920.1055/0.-1055.1920.1055/1792.136.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1757114278995" />
@@ -327,10 +334,10 @@
     </state>
     <state x="2595" y="532" key="Github.ShareDialog/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1756768582779" />
     <state x="2595" y="532" width="594" height="280" key="Github.ShareDialog/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756757638132" />
-    <state x="673" y="207" key="RollbackChangesDialog" timestamp="1757295577854">
+    <state x="673" y="207" key="RollbackChangesDialog" timestamp="1757371836069">
       <screen x="0" y="0" width="1792" height="1051" />
     </state>
-    <state x="673" y="207" key="RollbackChangesDialog/-1920.25.1920.1055/0.-1055.1920.1055/1792.136.1920.1055/0.0.1792.1051@0.0.1792.1051" timestamp="1757295577854" />
+    <state x="673" y="207" key="RollbackChangesDialog/-1920.25.1920.1055/0.-1055.1920.1055/1792.136.1920.1055/0.0.1792.1051@0.0.1792.1051" timestamp="1757371836069" />
     <state x="2513" y="344" key="RollbackChangesDialog/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1756924591303" />
     <state x="2513" y="344" key="RollbackChangesDialog/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756869344973" />
     <state x="2242" y="270" key="SettingsEditor" timestamp="1756768555759">
@@ -338,10 +345,10 @@
     </state>
     <state x="2242" y="270" key="SettingsEditor/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1756768555759" />
     <state x="2242" y="270" key="SettingsEditor/1792.136.1920.1055/-1920.25.1920.1055/0.-1055.1920.986/0.25.1792.1095@1792.136.1920.1055" timestamp="1756757710957" />
-    <state x="543" y="279" key="Vcs.Push.Dialog.v2" timestamp="1757274299225">
-      <screen x="0" y="0" width="1792" height="1120" />
+    <state x="543" y="262" key="Vcs.Push.Dialog.v2" timestamp="1757368170911">
+      <screen x="0" y="0" width="1792" height="1051" />
     </state>
-    <state x="543" y="262" key="Vcs.Push.Dialog.v2/-1920.25.1920.1055/0.-1055.1920.1055/1792.136.1920.1055/0.0.1792.1051@0.0.1792.1051" timestamp="1757205279277" />
+    <state x="543" y="262" key="Vcs.Push.Dialog.v2/-1920.25.1920.1055/0.-1055.1920.1055/1792.136.1920.1055/0.0.1792.1051@0.0.1792.1051" timestamp="1757368170911" />
     <state x="2374" y="399" key="Vcs.Push.Dialog.v2/-1920.25.1920.1055/0.-1055.1920.1055/1792.136.1920.1055/0.0.1792.1051@1792.136.1920.1055" timestamp="1757118352349" />
     <state x="543" y="279" key="Vcs.Push.Dialog.v2/-1920.25.1920.1055/0.-1055.1920.1055/1792.136.1920.1055/0.0.1792.1120@0.0.1792.1120" timestamp="1757194128068" />
     <state x="2374" y="399" key="Vcs.Push.Dialog.v2/-1920.25.1920.1055/0.-1055.1920.1055/1792.136.1920.1055/0.25.1792.1026@1792.136.1920.1055" timestamp="1757114280840" />
