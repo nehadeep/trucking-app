@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Box,
@@ -26,7 +26,7 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-
+import { useLocation } from "react-router-dom";
 
 const Auth: React.FC = () => {
     const navigate = useNavigate();
@@ -45,6 +45,18 @@ const Auth: React.FC = () => {
     const [otp, setOtp] = useState("");
     const [confirmationResult, setConfirmationResult] = useState<any>(null);
     const [showPassword, setShowPassword] = useState(false);
+
+
+    const [hideSignupToggle, setHideSignupToggle] = useState(false);
+
+    useEffect(() => {
+        const cameFromSuperadmin = localStorage.getItem("fromSuperadminLogin") === "true";
+        if (cameFromSuperadmin) {
+            setHideSignupToggle(true);
+            // optional: clear it if you only want it one-time
+            // localStorage.removeItem("fromSuperadminLogin");
+        }
+    }, []);
 
 
     const validateEmail = (email: string) => {
@@ -238,9 +250,9 @@ const Auth: React.FC = () => {
                 <CardContent>
                     {/* Logo + Heading */}
                     <Box textAlign="center" mb={2}>
-                        <img src="/logo.png" alt="FleetPro" style={{ width: 60, height: 60 }} />
+                        <img src="/logo.png" alt="Drive Sphere" style={{ width: 60, height: 60 }} />
                         <Typography variant="h5" fontWeight="bold" mt={1}>
-                            Welcome to FleetPro
+                            Welcome to Drive Sphere
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                             Sign in to continue
@@ -248,19 +260,29 @@ const Auth: React.FC = () => {
                     </Box>
 
                     {/* Google login */}
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        startIcon={<GoogleIcon />}
-                        sx={{ mb: 2, textTransform: "none" }}
-                        onClick={handleGoogleAuth}
-                    >
-                        Continue with Google
-                    </Button>
+                    {/*<Button*/}
+                    {/*    fullWidth*/}
+                    {/*    variant="outlined"*/}
+                    {/*    startIcon={<GoogleIcon />}*/}
+                    {/*    sx={{ mb: 2, textTransform: "none" }}*/}
+                    {/*    onClick={handleGoogleAuth}*/}
+                    {/*>*/}
+                    {/*    Continue with Google*/}
+                    {/*</Button>*/}
 
-                    <Divider sx={{ my: 2 }}>OR</Divider>
+                    {/*<Divider sx={{ my: 2 }}>OR</Divider>*/}
 
                     {/* Toggle Email/Phone */}
+                    {hideSignupToggle && (
+                        <Box textAlign="center" mb={2}>
+
+                            <Typography variant="h5" fontWeight="bold" mt={1}>
+                               Superadmin
+                            </Typography>
+
+                        </Box>
+                    )}
+
                     <Tabs
                         value={mode}
                         onChange={(_, val) => setMode(val)}
@@ -344,19 +366,39 @@ const Auth: React.FC = () => {
                         </>
                     )}
 
+
                     {/* Footer */}
-                    <Box
-                        textAlign="center"
-                        mt={2}
-                        sx={{ cursor: "pointer" }}
-                        onClick={() => setIsSignup(!isSignup)}
-                    >
-                        <Typography variant="body2" color="primary">
-                            {isSignup
-                                ? "Already have an account? Login"
-                                : "Need an account? Sign up"}
-                        </Typography>
-                    </Box>
+                    {!hideSignupToggle && (
+                        <Box textAlign="center" mt={2}>
+                            <Typography variant="body2" color="text.secondary" gutterBottom>
+                                Need an account? Choose an option:
+                            </Typography>
+
+                            {/* Sign up as a new company (Admin) */}
+                            <Typography
+                                variant="body2"
+                                color="primary"
+                                sx={{ cursor: "pointer", mb: 1 }}
+                                onClick={() => navigate("/signup/admin")}
+                            >
+                                ➝ Sign up as a new company
+                            </Typography>
+
+                            {/* Sign up as a driver */}
+                            <Typography
+                                variant="body2"
+                                color="primary"
+                                sx={{ cursor: "pointer" }}
+                                onClick={() => {
+                                    // drivers should normally use an invite link
+                                    alert("Drivers must sign up using an invite link from their company admin.");
+                                    // later you can do: navigate("/signup/driver?token=...")
+                                }}
+                            >
+                                ➝ Sign up as a driver
+                            </Typography>
+                        </Box>
+                    )}
 
                     <Box display="flex" justifyContent="space-between" mt={2}>
                         <Typography variant="body2" color="primary" sx={{ cursor: "pointer" }}>
