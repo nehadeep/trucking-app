@@ -23,6 +23,8 @@ import AdminSettings from "./components/layouts/admin-layouts/Settings";
 import SuperadminSignupAuth from "./components/Auth/superadmin-signup-auth";
 import AdminSignupAuth from "./components/Auth/admin-signup-auth";
 import DriverSignupAuth from "./components/Auth/driver-signup-auth"
+import SuperadminDashboard from "./components/layouts/superadmin-layouts/SuperadminDashboard";
+import CompanyRequests from "./components/layouts/superadmin-layouts/CompanyRequests";
 
 const App: React.FC = () => {
     return (
@@ -40,7 +42,9 @@ const App: React.FC = () => {
                 <Route path="/console" element={<ConsoleLayout />}>
                     {/* Superadmin routes */}
                     <Route path="superadmin" element={<SuperadminLayout />}>
-                        <Route index element={<Navigate to="settings" />} />
+                        <Route index element={<Navigate to="dashboard" />} />
+                        <Route path="dashboard" element={<SuperadminDashboard />} />
+                        <Route path="requests" element={<CompanyRequests />} />
                         <Route path="settings" element={<Settings />} />
                         <Route path="invites" element={<Invites />}>
                             <Route index element={<SendInvitation />} />

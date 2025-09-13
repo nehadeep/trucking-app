@@ -51,7 +51,7 @@ const ConsoleLayout: React.FC = () => {
                         variant="h6"
                         sx={{ flexGrow: 1, textAlign: "center" }}
                     >
-                        Fleet Console
+                        Drive Sphere
                     </Typography>
 
                     {/* Always visible actions */}
@@ -87,7 +87,7 @@ const ConsoleLayout: React.FC = () => {
                 sx={{ p: 2, textAlign: "center", bgcolor: "grey.200" }}
             >
                 <Typography variant="body2">
-                    © {new Date().getFullYear()} FleetPro Logistics
+                    © {new Date().getFullYear()} DriveSphere Logistics
                 </Typography>
             </Box>
         </Box>

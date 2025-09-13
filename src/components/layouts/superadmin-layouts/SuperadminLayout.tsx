@@ -15,12 +15,16 @@ import {
 import SettingsIcon from "@mui/icons-material/Settings";
 import MailIcon from "@mui/icons-material/Mail";
 import { OutletContextType } from "../console-layouts/ConsoleLayout";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import BusinessIcon from "@mui/icons-material/Business";
 
 const drawerWidth = 240;
 
 const navItems = [
+    { text: "Dashboard", icon:<DashboardIcon />, path: "dashboard" },
     { text: "Settings", icon: <SettingsIcon />, path: "settings" },
     { text: "Invites", icon: <MailIcon />, path: "invites" },
+    { text: "Company Requests", icon: <BusinessIcon />, path: "requests" },
 ];
 
 const SuperadminLayout: React.FC = () => {
@@ -32,7 +36,7 @@ const SuperadminLayout: React.FC = () => {
     const drawer = (
         <div>
             <Toolbar>
-                <Typography variant="h6">Superadmin Panel</Typography>
+                <Typography variant="h6">Drive Sphere Panel</Typography>
             </Toolbar>
             <List>
                 {navItems.map((item) => (

@@ -101,7 +101,8 @@ const AdminSignupAuth: React.FC = () => {
         }
 
         try {
-            await addDoc(collection(db, "company_requests"), {
+            // 1. Save company request
+            const reqRef = await addDoc(collection(db, "company_requests"), {
                 companyName,
                 dotNumber: dotNumber || null,
                 employerNumber: employerNumber || null,
@@ -115,15 +116,23 @@ const AdminSignupAuth: React.FC = () => {
                 createdAt: serverTimestamp(),
             });
 
+            // 2. Push a notification for superadmins
+            await addDoc(collection(db, "notifications"), {
+                type: "company_request",
+                companyName,
+                requestId: reqRef.id,
+                adminEmail,
+                adminPhone,
+                createdAt: serverTimestamp(),
+                status: "unread"
+            });
+
             enqueueSnackbar("Request submitted. Our team will contact you shortly.", { variant: "success" });
-            // optional: reset request fields
-            // setCompanyName(""); setDotNumber(""); setEmployerNumber("");
-            // setFirstName(""); setLastName(""); setAdminEmail(""); setAdminPhone("");
-            // setWasSubmittedRequest(false); setErrorsRequest({});
         } catch (e: any) {
             enqueueSnackbar("Failed to submit request.", { variant: "error" });
         }
     };
+
 
     const handleSelfServeSignup = async () => {
         setWasSubmittedSelf(true);
@@ -223,9 +232,11 @@ const AdminSignupAuth: React.FC = () => {
                                     <Grid item xs={12} md={6}>
                                         <TextField
                                             fullWidth
-                                            label="USDOT Number (optional)"
+                                            label="USDOT Number"
                                             value={dotNumber}
                                             onChange={(e) => setDotNumber(e.target.value)}
+                                            error={wasSubmittedRequest && !!errorsRequest.dotNumber}
+                                            helperText={wasSubmittedRequest ? (errorsRequest.dotNumber || "") : ""}
                                         />
                                     </Grid>
 
