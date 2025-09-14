@@ -1,4 +1,4 @@
-
+// components/layouts/superadmin-layouts/CompanyRequests.tsx
 import React, { useEffect, useState } from "react";
 import {
     Box,
@@ -11,26 +11,51 @@ import {
     TextField,
     Typography,
     Stack,
+    IconButton,
 } from "@mui/material";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import {
+    doc,
+    collection,
+    onSnapshot,
+    query,
+    orderBy,
+    updateDoc,
+} from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
 
 import BusinessIcon from "@mui/icons-material/Business";
 import EmailIcon from "@mui/icons-material/Email";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import EventIcon from "@mui/icons-material/Event";
+import PhoneIcon from "@mui/icons-material/Phone";
+import PeopleIcon from "@mui/icons-material/People";
+import EditIcon from "@mui/icons-material/Edit";
+
+import { formatDate } from "../../../utils/dateFormatter";
+import EditCompanyRequestModal, {CompanyRequest} from "../../modals/EditCompanyRequestModal";
 
 type Request = {
     id: string;
     companyName: string;
-    contactName: string;
-    requestType: string;
-    adminEmail: string;
-    location?: string;
+    dotNumber?: string;
+    employerIdentificationNumber?: string;
     status: string;
-    priority?: string;
     createdAt?: any;
-    notes?: string;
+    numEmployees?: number;
+    address?: {
+        address1?: string;
+        address2?: string | null;
+        city?: string;
+        state?: string;
+        zip?: string;
+        country?: string;
+    };
+    requestedBy?: {
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+        phone?: string;
+    };
 };
 
 const statusTabs = ["New", "In Review", "Quoted", "Accepted", "Rejected", "Completed"];
@@ -39,6 +64,8 @@ const CompanyRequests: React.FC = () => {
     const [requests, setRequests] = useState<Request[]>([]);
     const [tab, setTab] = useState("New");
     const [search, setSearch] = useState("");
+    const [editOpen, setEditOpen] = useState(false);
+    const [selectedRequest, setSelectedRequest] = useState<CompanyRequest | null>(null);
 
     useEffect(() => {
         const q = query(collection(db, "company_requests"), orderBy("createdAt", "desc"));
@@ -54,11 +81,45 @@ const CompanyRequests: React.FC = () => {
 
     const filtered = requests.filter(
         (r) =>
-            r.status?.toLowerCase() === tab.toLowerCase() &&
+            ((tab === "New" && r.status === "pending") ||
+                (tab === "In Review" && r.status === "in_review") ||
+                (tab === "Quoted" && r.status === "quoted") ||
+                (tab === "Accepted" && r.status === "accepted") ||
+                (tab === "Rejected" && r.status === "rejected") ||
+                (tab === "Completed" && r.status === "completed")) &&
             (r.companyName?.toLowerCase().includes(search.toLowerCase()) ||
-                r.contactName?.toLowerCase().includes(search.toLowerCase()) ||
-                r.requestType?.toLowerCase().includes(search.toLowerCase()))
+                r.requestedBy?.firstName?.toLowerCase().includes(search.toLowerCase()) ||
+                r.requestedBy?.lastName?.toLowerCase().includes(search.toLowerCase()))
     );
+
+    const updateRequestStatus = async (id: string, status: string, autoTab?: string) => {
+        try {
+            await updateDoc(doc(db, "company_requests", id), { status });
+            console.log(`Request ${id} marked as ${status}`);
+            if (autoTab) setTab(autoTab); // switch to target tab
+        } catch (err) {
+            console.error("Failed to update request:", err);
+        }
+    };
+
+    const getStatusChip = (status: string) => {
+        switch (status) {
+            case "pending":
+                return <Chip label="NEW" color="primary" size="small" />;
+            case "in_review":
+                return <Chip label="IN REVIEW" color="info" size="small" />;
+            case "quoted":
+                return <Chip label="QUOTED" color="secondary" size="small" />;
+            case "accepted":
+                return <Chip label="ACCEPTED" color="success" size="small" />;
+            case "rejected":
+                return <Chip label="REJECTED" color="error" size="small" />;
+            case "completed":
+                return <Chip label="COMPLETED" color="default" size="small" />;
+            default:
+                return null;
+        }
+    };
 
     return (
         <Box p={3}>
@@ -72,7 +133,7 @@ const CompanyRequests: React.FC = () => {
 
             {/* Search */}
             <TextField
-                placeholder="Search by company name, contact, or request type..."
+                placeholder="Search by company name or contact..."
                 fullWidth
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -100,67 +161,144 @@ const CompanyRequests: React.FC = () => {
                 )}
 
                 {filtered.map((r) => (
-                    <Grid item xs={12} md={6} key={r.id}>
+                    <Grid item xs={12} md={4} key={r.id}>
                         <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
                             <CardContent>
-                                <Typography variant="h6" fontWeight="bold">
-                                    {r.companyName}
-                                </Typography>
-                                <Typography variant="subtitle2" color="text.secondary">
-                                    {r.contactName}
-                                </Typography>
-
-                                {/* Chips */}
-                                <Stack direction="row" spacing={1} sx={{ my: 1 }}>
-                                    {r.priority && (
-                                        <Chip
-                                            label={r.priority}
-                                            color={r.priority === "urgent" ? "error" : "warning"}
+                                {/* Top Row: Company + Status */}
+                                <Box
+                                    display="flex"
+                                    justifyContent="space-between"
+                                    alignItems="center"
+                                >
+                                    <Box>
+                                        <Typography variant="h6" fontWeight="bold">
+                                            {r.companyName}
+                                        </Typography>
+                                        {r.requestedBy?.firstName && (
+                                            <Typography variant="subtitle2" color="text.secondary">
+                                                {r.requestedBy.firstName} {r.requestedBy.lastName}
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                    <Stack direction="row" spacing={1} alignItems="center">
+                                        <IconButton
                                             size="small"
-                                        />
-                                    )}
-                                    <Chip label="new" color="primary" size="small" />
-                                </Stack>
+                                            color="default"
+                                            onClick={() => {
+                                                setSelectedRequest(r);
+                                                setEditOpen(true);
+                                            }}
+                                        >
+                                            <EditIcon fontSize="small" />
+                                        </IconButton>
+                                        {getStatusChip(r.status)}
+                                    </Stack>
+                                </Box>
 
                                 {/* Details */}
-                                <Stack spacing={1} mt={1}>
-                                    <Box display="flex" alignItems="center" gap={1}>
-                                        <BusinessIcon fontSize="small" />
-                                        <Typography variant="body2">{r.requestType}</Typography>
-                                    </Box>
+                                <Stack spacing={1} mt={2}>
                                     <Box display="flex" alignItems="center" gap={1}>
                                         <EmailIcon fontSize="small" />
-                                        <Typography variant="body2">{r.adminEmail}</Typography>
+                                        <Typography variant="body2">{r.requestedBy?.email}</Typography>
                                     </Box>
-                                    {r.location && (
+                                    {r.requestedBy?.phone && (
+                                        <Box display="flex" alignItems="center" gap={1}>
+                                            <PhoneIcon fontSize="small" />
+                                            <Typography variant="body2">{r.requestedBy.phone}</Typography>
+                                        </Box>
+                                    )}
+                                    <Box display="flex" alignItems="center" gap={1}>
+                                        <BusinessIcon fontSize="small" />
+                                        <Typography variant="body2">
+                                            DOT: {r.dotNumber || "—"} | EIN:{" "}
+                                            {r.employerIdentificationNumber || "—"}
+                                        </Typography>
+                                    </Box>
+                                    {(r.address?.address1 || r.address?.city) && (
                                         <Box display="flex" alignItems="center" gap={1}>
                                             <LocationOnIcon fontSize="small" />
-                                            <Typography variant="body2">{r.location}</Typography>
+                                            <Typography variant="body2">
+                                                {r.address?.address1}{" "}
+                                                {r.address?.address2
+                                                    ? `, ${r.address?.address2}`
+                                                    : ""}
+                                                , {r.address?.city}, {r.address?.state}{" "}
+                                                {r.address?.zip}, {r.address?.country}
+                                            </Typography>
+                                        </Box>
+                                    )}
+                                    {r.numEmployees && (
+                                        <Box display="flex" alignItems="center" gap={1}>
+                                            <PeopleIcon fontSize="small" />
+                                            <Typography variant="body2">
+                                                {r.numEmployees} Employees
+                                            </Typography>
                                         </Box>
                                     )}
                                     {r.createdAt && (
                                         <Box display="flex" alignItems="center" gap={1}>
                                             <EventIcon fontSize="small" />
                                             <Typography variant="body2">
-                                                {r.createdAt.toDate().toLocaleString()}
+                                                {formatDate(r.createdAt.toDate())}
                                             </Typography>
                                         </Box>
                                     )}
                                 </Stack>
 
-                                {/* Notes */}
-                                {r.notes && (
-                                    <Typography variant="body2" color="text.secondary" mt={1}>
-                                        {r.notes}
-                                    </Typography>
-                                )}
+                                {/* Action buttons */}
+                                <Stack direction="row" spacing={1} mt={2}>
+                                    {r.status === "pending" && (
+                                        <Chip
+                                            label="Mark In Review"
+                                            color="success"
+                                            clickable
+                                            onClick={() => {
+                                                if (
+                                                    window.confirm(
+                                                        "Have you verified all the details with admin?"
+                                                    )
+                                                ) {
+                                                    updateRequestStatus(r.id, "in_review", "In Review");
+                                                }
+                                            }}
+                                        />
+                                    )}
+                                    {r.status === "in_review" && (
+                                        <Chip
+                                            label="Mark Quoted"
+                                            color="secondary"
+                                            clickable
+                                            onClick={() =>
+                                                updateRequestStatus(r.id, "quoted", "Quoted")
+                                            }
+                                        />
+                                    )}
+                                    {r.status === "quoted" && (
+                                        <Chip
+                                            label="Mark Accepted"
+                                            color="success"
+                                            clickable
+                                            onClick={() =>
+                                                updateRequestStatus(r.id, "accepted", "Accepted")
+                                            }
+                                        />
+                                    )}
+                                </Stack>
                             </CardContent>
                         </Card>
                     </Grid>
                 ))}
             </Grid>
+            {/* Modal lives here, outside the Box */}
+            <EditCompanyRequestModal
+                open={editOpen}
+                onClose={() => setEditOpen(false)}
+                request={selectedRequest}
+            />
         </Box>
-    );
+
+
+);
 };
 
 export default CompanyRequests;

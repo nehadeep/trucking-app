@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { collection, onSnapshot, query, where ,writeBatch,getDocs} from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
 import BusinessIcon from "@mui/icons-material/Business";
 import PeopleIcon from "@mui/icons-material/People";
@@ -15,8 +15,9 @@ const SuperadminDashboard: React.FC = () => {
     const navigate = useNavigate();
     useEffect(() => {
         const q = query(
-            collection(db, "company_requests"),
-            where("status", "==", "pending")
+            collection(db, "notifications"),
+            where("status", "==", "unread"),
+            where("type", "==", "company_request")
         );
 
         const unsub = onSnapshot(q, (snap) => {
@@ -26,6 +27,31 @@ const SuperadminDashboard: React.FC = () => {
         return () => unsub();
     }, []);
 
+    const handleCompanyRequestsClick = async () => {
+        try {
+            // Query all unread company_request notifications
+            const q = query(
+                collection(db, "notifications"),
+                where("status", "==", "unread"),
+                where("type", "==", "company_request")
+            );
+
+            const snap = await getDocs(q);
+
+            if (!snap.empty) {
+                const batch = writeBatch(db);
+                snap.forEach((docSnap) => {
+                    batch.update(docSnap.ref, { status: "read" });
+                });
+                await batch.commit();
+            }
+
+            // After marking as read, navigate
+            navigate("/console/superadmin/requests");
+        } catch (err) {
+            console.error("Error updating notifications:", err);
+        }
+    };
     return (
         <Box p={3}>
             <Typography variant="h5" fontWeight="bold" gutterBottom>
@@ -39,14 +65,24 @@ const SuperadminDashboard: React.FC = () => {
                 {/* Card 1: New Company Requests */}
                 <Grid item xs={12} md={3}>
                     <Card sx={{ borderRadius: 3, boxShadow: 2,cursor: "pointer" }}
-                          onClick={() => navigate("/console/superadmin/requests")}
+                          onClick={handleCompanyRequestsClick}
                            >
                         <CardContent>
-                            <BusinessIcon color="primary" fontSize="large" />
-                            <Typography variant="subtitle2" color="text.secondary" mt={1}>
-                                NEW COMPANY REQUESTS
+                            {/* Row: Icon + Title */}
+                            <Box display="flex" alignItems="center" gap={1}>
+                                <BusinessIcon color="primary" fontSize="large" />
+                                <Typography variant="subtitle2" color="text.secondary" fontWeight="bold">
+                                    NEW COMPANY REQUESTS
+                                </Typography>
+                            </Box>
+
+                            {/* Row: Description */}
+                            <Typography variant="body2" color="text.secondary" mt={1}>
+                                Pending approval requests from new companies
                             </Typography>
-                            <Typography variant="h5" fontWeight="bold">
+
+                            {/* Row: Count */}
+                            <Typography variant="h4" color="primary" mt={2}>
                                 {newCompanyRequests}
                             </Typography>
                         </CardContent>
