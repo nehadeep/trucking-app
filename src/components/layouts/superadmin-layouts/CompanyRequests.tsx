@@ -22,7 +22,7 @@ import {
     updateDoc,
 } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
-
+import { httpsCallable } from "firebase/functions";
 import BusinessIcon from "@mui/icons-material/Business";
 import EmailIcon from "@mui/icons-material/Email";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -33,6 +33,7 @@ import EditIcon from "@mui/icons-material/Edit";
 
 import { formatDate } from "../../../utils/dateFormatter";
 import EditCompanyRequestModal, {CompanyRequest} from "../../modals/EditCompanyRequestModal";
+import { functions } from "../../../firebaseConfig";
 
 type Request = {
     id: string;
@@ -101,6 +102,36 @@ const CompanyRequests: React.FC = () => {
             console.error("Failed to update request:", err);
         }
     };
+
+    const handleSendInvite = async (req: Request) => {
+        if (!req.requestedBy?.email) {
+            alert("❌ No email found for this request.");
+            return;
+        }
+
+        if (
+            window.confirm(
+                `Send invite link to ${req.requestedBy.email}?`
+            )
+        ) {
+            try {
+                const signupUrl = `http://localhost:3000/signup/admin?requestId=${req.id}`;
+                const sendInvite = httpsCallable(functions, "sendSuperAdminInvite");
+
+                await sendInvite({
+                    email: req.requestedBy.email,
+                    packageId: "basic-plan", // or pick dynamically
+                    signupUrl,
+                });
+
+                alert(`✅ Invite link sent to ${req.requestedBy.email}`);
+            } catch (error) {
+                console.error("Error sending invite:", error);
+                alert("❌ Failed to send invite. Please try again.");
+            }
+        }
+    };
+
 
     const getStatusChip = (status: string) => {
         switch (status) {
@@ -266,11 +297,17 @@ const CompanyRequests: React.FC = () => {
                                     {r.status === "in_review" && (
                                         <Chip
                                             label="Mark Quoted"
-                                            color="secondary"
+                                            color="warning"
                                             clickable
-                                            onClick={() =>
-                                                updateRequestStatus(r.id, "quoted", "Quoted")
-                                            }
+                                            onClick={() => {
+                                                if (
+                                                    window.confirm(
+                                                        "Has the admin signed up for a payment plan or selected a package?"
+                                                    )
+                                                ) {
+                                                    updateRequestStatus(r.id, "quoted", "Quoted");
+                                                }
+                                            }}
                                         />
                                     )}
                                     {r.status === "quoted" && (
@@ -281,6 +318,14 @@ const CompanyRequests: React.FC = () => {
                                             onClick={() =>
                                                 updateRequestStatus(r.id, "accepted", "Accepted")
                                             }
+                                        />
+                                    )}
+                                    {r.status === "Accepted" && (
+                                        <Chip
+                                            label="Send Invite Link"
+                                            color="success"
+                                            clickable
+                                            onClick={() => handleSendInvite(r)}
                                         />
                                     )}
                                 </Stack>
