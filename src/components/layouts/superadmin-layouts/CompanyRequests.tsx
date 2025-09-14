@@ -35,6 +35,7 @@ import { formatDate } from "../../../utils/dateFormatter";
 import EditCompanyRequestModal, {CompanyRequest} from "../../modals/EditCompanyRequestModal";
 import { functions } from "../../../firebaseConfig";
 
+
 type Request = {
     id: string;
     companyName: string;
@@ -115,13 +116,19 @@ const CompanyRequests: React.FC = () => {
             )
         ) {
             try {
-                const signupUrl = `http://localhost:3000/signup/admin?requestId=${req.id}`;
+                // 🔑 Generate a secure token (UUID or JWT if you prefer)
+                const token = Math.random().toString(36).substring(2); // simple random token
+
+                // ✅ Use Firebase Hosting domain (change to your project domain)
+                const signupUrl = `https://trucking-app-3e473.web.app/signup/admin?requestId=${req.id}&token=${token}`;
+
                 const sendInvite = httpsCallable(functions, "sendSuperAdminInvite");
 
                 await sendInvite({
                     email: req.requestedBy.email,
-                    packageId: "basic-plan", // or pick dynamically
+                    packageId: "basic-plan", // or pass dynamically
                     signupUrl,
+                    token, // send token to backend so you can validate later
                 });
 
                 alert(`✅ Invite link sent to ${req.requestedBy.email}`);
@@ -131,7 +138,6 @@ const CompanyRequests: React.FC = () => {
             }
         }
     };
-
 
     const getStatusChip = (status: string) => {
         switch (status) {
@@ -320,7 +326,7 @@ const CompanyRequests: React.FC = () => {
                                             }
                                         />
                                     )}
-                                    {r.status === "Accepted" && (
+                                    {r.status === "accepted" && (
                                         <Chip
                                             label="Send Invite Link"
                                             color="success"
